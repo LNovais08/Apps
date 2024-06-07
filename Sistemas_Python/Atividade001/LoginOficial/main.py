@@ -16,7 +16,7 @@ def main(page: Page):
     # Criando o contêiner tela com imagem de fundo
     img_container = ft.Container(
         content=ft.Image(
-            src='Atividade001/Login/img/login.jpg',
+            src='Atividade001/LoginOficial/img/login.jpg',
             width=page.window_width,
             height=page.window_height,
             fit=ft.ImageFit.COVER,
@@ -26,7 +26,7 @@ def main(page: Page):
 
     # Função para conectar ao banco de dados e criar a tabela se não existir
     def init_db():
-        conn = sqlite3.connect('Atividade001/Login/bd/logins.db')
+        conn = sqlite3.connect('Atividade001/LoginOficial/db/logins.db')
         cursor = conn.cursor()
         cursor.execute('''CREATE TABLE IF NOT EXISTS logins
                           (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, email TEXT, senha TEXT)''')
@@ -36,32 +36,6 @@ def main(page: Page):
     # Inicializa o banco de dados
     init_db()
     
-    def show_logado_page():
-        page.clean()
-        # Itens para Login
-        nonlocal email_login, senha_login
-        text_login = ft.Text("Logado", color="Black", size=35)
-        # Criando o contêiner de login
-        login = ft.Container(
-            content=ft.Column(
-                controls=[text_login, logado],
-                alignment=ft.MainAxisAlignment.CENTER,
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                spacing=20
-            ),
-            bgcolor=ft.colors.WHITE,
-            width=595,
-            height=670,
-            alignment=ft.alignment.center
-        )
-        principal.content = ft.Row(
-            controls=[img_container, login],
-            alignment=ft.MainAxisAlignment.CENTER,  # Centralizando os contêineres na tela
-            expand=True
-        )
-        page.add(principal)
-        page.update()
-
     def show_login_page():
         page.clean()
         # Itens para Login
@@ -109,7 +83,7 @@ def main(page: Page):
                 page.update()
             else:
                 # Conecta ao banco de dados e insere os valores
-                conn = sqlite3.connect('Atividade001/Login/bd/logins.db')
+                conn = sqlite3.connect('Atividade001/LoginOficial/db/logins.db')
                 cursor = conn.cursor()
                 cursor.execute("INSERT INTO logins (nome, email, senha) VALUES (?, ?, ?)", (nome1, email1, senha1))
                 conn.commit()
@@ -156,16 +130,14 @@ def main(page: Page):
             page.update()
         else:
             # Conecta ao banco de dados e insere os valores
-            conn = sqlite3.connect('Atividade001/Login/bd/logins.db')
+            conn = sqlite3.connect('Atividade001/LoginOficial/db/logins.db')
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM logins WHERE email=? AND senha=?", (email1, senha1))
             result = cursor.fetchone()
             conn.close()
             if result:
                 page.clean()
-                nonlocal logado
-                logado = ft.Text(f"Bem-vindo, {result[0]}  ||  {result[1]}!", size=25, color="black")
-                show_logado_page()
+                page.add(ft.Text(f"Bem-vindo, {result[1]}!", size=25))
             else:
                 email_login.error_text = "E-mail ou senha incorretos"
                 senha_login.value = ""
@@ -177,7 +149,7 @@ def main(page: Page):
     nome = None
     email = None
     senha = None
-    logado = None
+
     show_login_page()
 
 ft.app(target=main)
