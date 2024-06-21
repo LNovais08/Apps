@@ -16,7 +16,7 @@ def main(page: Page):
     # Criando o contêiner tela com imagem de fundo
     img_container = ft.Container(
         content=ft.Image(
-            src='Atividade001/LoginOficial/img/login.jpg',
+            src='Atividade001/Login/img/login.jpg',
             width=page.window_width,
             height=page.window_height,
             fit=ft.ImageFit.COVER,
@@ -26,7 +26,7 @@ def main(page: Page):
 
     # Função para conectar ao banco de dados e criar a tabela se não existir
     def init_db():
-        conn = sqlite3.connect('Atividade001/LoginOficial/db/logins.db')
+        conn = sqlite3.connect('Atividade001/Login/db/logins.db')
         cursor = conn.cursor()
         cursor.execute('''CREATE TABLE IF NOT EXISTS logins
                           (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, email TEXT, senha TEXT)''')
@@ -83,7 +83,7 @@ def main(page: Page):
                 page.update()
             else:
                 # Conecta ao banco de dados e insere os valores
-                conn = sqlite3.connect('Atividade001/LoginOficial/db/logins.db')
+                conn = sqlite3.connect('Atividade001/Login/db/logins.db')
                 cursor = conn.cursor()
                 cursor.execute("INSERT INTO logins (nome, email, senha) VALUES (?, ?, ?)", (nome1, email1, senha1))
                 conn.commit()
@@ -130,7 +130,7 @@ def main(page: Page):
             page.update()
         else:
             # Conecta ao banco de dados e insere os valores
-            conn = sqlite3.connect('Atividade001/LoginOficial/db/logins.db')
+            conn = sqlite3.connect('Atividade001/Login/db/logins.db')
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM logins WHERE email=? AND senha=?", (email1, senha1))
             result = cursor.fetchone()

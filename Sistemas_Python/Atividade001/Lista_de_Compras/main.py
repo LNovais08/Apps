@@ -11,7 +11,7 @@ def main(page: Page):
         conn = sqlite3.connect('Atividade001/Lista_de_Compras/db/compras.db')
         cursor = conn.cursor()
         cursor.execute('''CREATE TABLE IF NOT EXISTS compras
-                          (idLista TEXT,idCompra INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT)''')
+                          (idLista TEXT, idCompra INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT)''')
         conn.commit()
         conn.close()
 
@@ -22,15 +22,15 @@ def main(page: Page):
     def get_current_id_lista():
         conn = sqlite3.connect('Atividade001/Lista_de_Compras/db/compras.db')
         cursor = conn.cursor()
-        cursor.execute("SELECT MAX(idCompra) FROM compras")
+        cursor.execute("SELECT MAX(idLista) FROM compras")
         result = cursor.fetchone()
         if result[0] is None:
-            cursor.execute("INSERT INTO compras DEFAULT VALUES")
-            conn.commit()
-            cursor.execute("SELECT MAX(idCompra) FROM compras")
-            result = cursor.fetchone()
+            id_lista = "LISTA1"
+        else:
+            id_lista_num = int(result[0].replace("LISTA", ""))
+            id_lista = f"{id_lista_num + 1}"
         conn.close()
-        return result[0]
+        return id_lista
 
     # Contador de itens
     cont = 0
@@ -39,7 +39,7 @@ def main(page: Page):
     # Função para adicionar item à lista
     def add_item(e):
         nonlocal cont  # Permite modificar a variável cont
-        item = compra.value
+        item = compra.value.strip()
         if item:
             # Incrementa o contador e adiciona o item na lista
             cont += 1
@@ -47,29 +47,28 @@ def main(page: Page):
             compra.value = ""
             items.update()
             page.update()
+        else:
+            compra.error_text = "Item não pode ser vazio"
+            compra.update()
 
     # Função para finalizar a lista e salvar os itens no banco de dados
     def Fim(e):
         nonlocal id_lista, cont
-        # Conecta ao banco de dados e insere os valores
-        conn = sqlite3.connect('Atividade001/Lista_de_Compras/db/compras.db')
-        cursor = conn.cursor()
-        for control in items.controls:  # Pegar os itens da lista pelo for
-            item_value = control.value.split(". ", 1)[1]  # Separa o número do item
-            cursor.execute("INSERT INTO compras (idlista, nome) VALUES (?, ?)", (id_lista, item_value))  # Insere os itens no db
-        conn.commit()
-        conn.close()
-        items.controls.clear()  # Limpa a lista
-        items.update()
-        page.update()
-        cont = 0  # Reinicia o contador
-        # Incrementa o id_lista para a próxima lista
-        conn = sqlite3.connect('Atividade001/Lista_de_Compras/db/compras.db')
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO compras DEFAULT VALUES")
-        conn.commit()
-        id_lista = cursor.lastrowid
-        conn.close()
+        if items.controls:
+            # Conecta ao banco de dados e insere os valores
+            conn = sqlite3.connect('Atividade001/Lista_de_Compras/db/compras.db')
+            cursor = conn.cursor()
+            for control in items.controls:  # Pegar os itens da lista pelo for
+                item_value = control.value.split(". ", 1)[1]  # Separa o número do item
+                cursor.execute("INSERT INTO compras (idLista, nome) VALUES (?, ?)", (id_lista, item_value))  # Insere os itens no db
+            conn.commit()
+            conn.close()
+            items.controls.clear()  # Limpa a lista
+            items.update()
+            page.update()
+            cont = 0  # Reinicia o contador
+            # Incrementa o id_lista para a próxima lista
+            id_lista = get_current_id_lista()
 
     # Lista de itens
     items = ft.ListView(expand=True, spacing=10)
