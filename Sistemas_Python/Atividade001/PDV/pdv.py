@@ -5,7 +5,7 @@ import sqlite3
 def main(page: Page):
     
     # título da Barra
-    page.title = "Mercado"
+    page.title = "SuperMarket"
     # proibindo o redimensionamento da Tela
     page.window_resizable = False
     # alinhamento da view
@@ -82,7 +82,6 @@ def main(page: Page):
     )
 
     page.add(background_image)
-
     page.update()
 
 ft.app(target=main)
