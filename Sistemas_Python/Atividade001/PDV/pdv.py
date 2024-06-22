@@ -31,45 +31,35 @@ def main(page: Page):
             page.update()
         
         def add_to_list(e):
-            if Codigo.value and txt_number.value.isdigit():
-                items.append([Codigo.value, txt_number.value])
+            if Codigo.value and Produto.value and txt_valor.value and txt_number.value.isdigit():
+                items.append([Codigo.value, Produto.value, txt_number.value, txt_valor.value])
                 update_table()
                 Codigo.value = ""
+                Produto.value = ""
                 txt_number.value = "0"
+                txt_valor.value = "0"
                 page.update()
         
         def update_table():
-            rows = [DataRow(cells=[DataCell(Text(cell)) for cell in row]) for row in items]
+            rows = []
+            for index, row in enumerate(items):
+                row_color = ft.colors.GREY_200 if index % 2 == 0 else ft.colors.GREY_400
+                rows.append(DataRow(
+                    cells=[DataCell(Text(cell, color=ft.colors.BLACK)) for cell in row],
+                    color=row_color
+                ))
             data_grid.rows = rows
             page.update()
 
         # Itens para PDV
-        Codigo = ft.TextField(label="Código", width=450, color="black", text_size=15)
-        txt_number = ft.TextField(label="Qtd", value="0", text_align=ft.TextAlign.CENTER, width=50, color="black")
-        
-        mais = ft.ElevatedButton(
-            text="+",
-            width=60, 
-            height=35,
-            color="white", 
-            style=ft.ButtonStyle(
-                shape={"": ft.RoundedRectangleBorder(radius=5)}  # Cantos retos
-            ),
-            on_click=plus_click
-        )
-        menos = ft.ElevatedButton(
-            text="-", 
-            width=60, 
-            height=35, 
-            color="white",
-            style=ft.ButtonStyle(
-                shape={"": ft.RoundedRectangleBorder(radius=5)}  # Cantos retos
-            ),
-            on_click=minus_click                 
-        )
+        Codigo = ft.TextField(label="Código", width=150, color="black", text_size=15)
+        Produto = ft.TextField(label="Produto", width=450, color="black", text_size=15)
+        txt_number = ft.TextField(label="Qtd", text_align=ft.TextAlign.CENTER, width=60, color="black")
+        txt_valor = ft.TextField(label="Valor", text_align=ft.TextAlign.CENTER, width=150, color="black")
+
         adicionar = ft.ElevatedButton(
             text="Adicionar",
-            width=100,
+            width=120,
             height=35,
             color="white",
             style=ft.ButtonStyle(
@@ -80,15 +70,21 @@ def main(page: Page):
         
         # Definindo as colunas do DataGrid
         columns = [
-            DataColumn(Text("Código")),
-            DataColumn(Text("Quantidade"))
+            DataColumn(Text("Código", color=ft.colors.BLACK)),
+            DataColumn(Text("Produto", color=ft.colors.BLACK)),
+            DataColumn(Text("Quantidade", color=ft.colors.BLACK)),
+            DataColumn(Text("Valor Unitário", color=ft.colors.BLACK))
         ]
         
         # Criando o DataGrid com as colunas definidas
-        data_grid = DataTable(columns=columns, rows=[])
+        data_grid = DataTable(columns=columns, 
+                              rows=[],
+                              width=550,
+                              height=225
+                    )
 
         linha1 = ft.Row(
-            controls=[Codigo, txt_number, mais, menos, adicionar],
+            controls=[Codigo, Produto, txt_number, txt_valor, adicionar],
             alignment=ft.MainAxisAlignment.CENTER,
             expand=True
         )
