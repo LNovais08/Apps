@@ -17,11 +17,70 @@ def main(page: Page):
     # Funções de navegação
     def PDV(e):
         page.clean()
-        page.add(
-            ft.Container(
-                content=ft.Text("PDV!", size=30, color=ft.colors.BLACK),
-            )
+        def minus_click(e):
+                txt_number.value = str(int(txt_number.value) - 1)
+                page.update()
+
+        def plus_click(e):
+                txt_number.value = str(int(txt_number.value) + 1)
+                page.update()
+        
+        # Itens para PDV
+        Codigo = ft.TextField(label="Codigo", width=450, color="black", text_size=15)
+        txt_number = ft.TextField(label="Qtd",value="0", text_align=ft.TextAlign.CENTER, width=50, color="black")
+        mais = ft.ElevatedButton(
+            text="+",
+            width=60, 
+            height=35,
+            color="white", 
+            style=ft.ButtonStyle(
+                    shape={"": ft.RoundedRectangleBorder(radius=5)}  # Cantos retos
+            ),
+            on_click=plus_click
+
         )
+        menos = ft.ElevatedButton(
+            text="-", 
+            width=60, 
+            height=35, 
+            color="white",
+            style=ft.ButtonStyle(
+                    shape={"": ft.RoundedRectangleBorder(radius=5)}  # Cantos retos
+            ),
+            on_click=minus_click                 
+        )
+         # Dados para exibir no DataGrid
+        data = [
+            ["John Doe", "john@example.com", "Admin"],
+            ["Jane Smith", "jane@example.com", "User"],
+            ["Sam Brown", "sam@example.com", "Guest"]
+        ]
+
+        # Definindo as colunas do DataGrid
+        columns = [
+            DataColumn(Text("Name")),
+            DataColumn(Text("Email")),
+            DataColumn(Text("Role"))
+        ]
+
+        # Adicionando as linhas de dados ao DataGrid
+        rows = []
+        for row_data in data:
+            rows.append(DataRow(cells=[DataCell(Text(cell)) for cell in row_data]))
+
+        # Criando o DataGrid com as colunas e linhas definidas
+        data_grid = DataTable(columns=columns, rows=rows)
+        principal = ft.Container(
+                bgcolor=ft.colors.WHITE,
+                alignment=ft.alignment.center,
+                expand=True
+        )
+        principal.content = ft.Row(
+            controls=[Codigo, txt_number, mais, menos,data_grid],
+            alignment=ft.MainAxisAlignment.CENTER,  # Centralizando os contêineres na tela
+            expand=True
+        )
+        page.add(principal)
         page.update()
 
     def CadastroU(e):
@@ -58,7 +117,7 @@ def main(page: Page):
     page.appbar = ft.AppBar(
         leading=ft.Icon(ft.icons.STORAGE),
         leading_width=40,
-        title=ft.Text("Mercado"),
+        title=ft.Text("SuperMarket"),
         center_title=False,
         bgcolor=ft.colors.SURFACE_VARIANT,
         actions=[
@@ -68,7 +127,7 @@ def main(page: Page):
                     ft.PopupMenuItem(text="Cadastro Usuário", icon="APP_REGISTRATION", on_click=CadastroU),
                     ft.PopupMenuItem(text="Cadastro Produto", icon="APP_REGISTRATION", on_click=CadastroP),
                     ft.PopupMenuItem(text="Vendas", icon="SELL", on_click=Vendas),
-                    ft.PopupMenuItem(text="Voltar", icon="OUTBOND", on_click=Voltar)
+                    ft.PopupMenuItem(text="Home", icon="OUTBOND", on_click=Voltar)
                 ]
             ),
         ],
