@@ -14,30 +14,48 @@ def main(page: Page):
     # padding da page
     page.padding = 40
     page.bgcolor = "WHITE"
+    # Variáveis globais
+    items = []
+
     # Funções de navegação
     def PDV(e):
         page.clean()
+        
         def minus_click(e):
+            if txt_number.value.isdigit() and int(txt_number.value) > 0:
                 txt_number.value = str(int(txt_number.value) - 1)
-                page.update()
+            page.update()
 
         def plus_click(e):
-                txt_number.value = str(int(txt_number.value) + 1)
+            txt_number.value = str(int(txt_number.value) + 1)
+            page.update()
+        
+        def add_to_list(e):
+            if Codigo.value and txt_number.value.isdigit():
+                items.append([Codigo.value, txt_number.value])
+                update_table()
+                Codigo.value = ""
+                txt_number.value = "0"
                 page.update()
         
+        def update_table():
+            rows = [DataRow(cells=[DataCell(Text(cell)) for cell in row]) for row in items]
+            data_grid.rows = rows
+            page.update()
+
         # Itens para PDV
-        Codigo = ft.TextField(label="Codigo", width=450, color="black", text_size=15)
-        txt_number = ft.TextField(label="Qtd",value="0", text_align=ft.TextAlign.CENTER, width=50, color="black")
+        Codigo = ft.TextField(label="Código", width=450, color="black", text_size=15)
+        txt_number = ft.TextField(label="Qtd", value="0", text_align=ft.TextAlign.CENTER, width=50, color="black")
+        
         mais = ft.ElevatedButton(
             text="+",
             width=60, 
             height=35,
             color="white", 
             style=ft.ButtonStyle(
-                    shape={"": ft.RoundedRectangleBorder(radius=5)}  # Cantos retos
+                shape={"": ft.RoundedRectangleBorder(radius=5)}  # Cantos retos
             ),
             on_click=plus_click
-
         )
         menos = ft.ElevatedButton(
             text="-", 
@@ -45,39 +63,48 @@ def main(page: Page):
             height=35, 
             color="white",
             style=ft.ButtonStyle(
-                    shape={"": ft.RoundedRectangleBorder(radius=5)}  # Cantos retos
+                shape={"": ft.RoundedRectangleBorder(radius=5)}  # Cantos retos
             ),
             on_click=minus_click                 
         )
-         # Dados para exibir no DataGrid
-        data = [
-            ["John Doe", "john@example.com", "Admin"],
-            ["Jane Smith", "jane@example.com", "User"],
-            ["Sam Brown", "sam@example.com", "Guest"]
-        ]
-
+        adicionar = ft.ElevatedButton(
+            text="Adicionar",
+            width=100,
+            height=35,
+            color="white",
+            style=ft.ButtonStyle(
+                shape={"": ft.RoundedRectangleBorder(radius=5)}  # Cantos retos
+            ),
+            on_click=add_to_list
+        )
+        
         # Definindo as colunas do DataGrid
         columns = [
-            DataColumn(Text("Name")),
-            DataColumn(Text("Email")),
-            DataColumn(Text("Role"))
+            DataColumn(Text("Código")),
+            DataColumn(Text("Quantidade"))
         ]
+        
+        # Criando o DataGrid com as colunas definidas
+        data_grid = DataTable(columns=columns, rows=[])
 
-        # Adicionando as linhas de dados ao DataGrid
-        rows = []
-        for row_data in data:
-            rows.append(DataRow(cells=[DataCell(Text(cell)) for cell in row_data]))
-
-        # Criando o DataGrid com as colunas e linhas definidas
-        data_grid = DataTable(columns=columns, rows=rows)
-        principal = ft.Container(
-                bgcolor=ft.colors.WHITE,
-                alignment=ft.alignment.center,
-                expand=True
+        linha1 = ft.Row(
+            controls=[Codigo, txt_number, mais, menos, adicionar],
+            alignment=ft.MainAxisAlignment.CENTER,
+            expand=True
         )
-        principal.content = ft.Row(
-            controls=[Codigo, txt_number, mais, menos,data_grid],
-            alignment=ft.MainAxisAlignment.CENTER,  # Centralizando os contêineres na tela
+        linha2 = ft.Container(
+            content=data_grid,
+            alignment=ft.alignment.center,
+            expand=True
+        )
+        principal = ft.Container(
+            content=ft.Column(
+                controls=[linha1, linha2],
+                alignment=ft.MainAxisAlignment.CENTER,
+                expand=True
+            ),
+            bgcolor=ft.colors.WHITE,
+            alignment=ft.alignment.center,
             expand=True
         )
         page.add(principal)
@@ -88,6 +115,8 @@ def main(page: Page):
         page.add(
             ft.Container(
                 content=ft.Text("Cadastro Usuário!", size=30, color=ft.colors.BLACK),
+                alignment=ft.alignment.center,
+                expand=True
             )
         )
         page.update()
@@ -97,6 +126,8 @@ def main(page: Page):
         page.add(
             ft.Container(
                 content=ft.Text("Cadastro Produto", size=30, color=ft.colors.BLACK),
+                alignment=ft.alignment.center,
+                expand=True
             )
         )
         page.update()
@@ -106,13 +137,17 @@ def main(page: Page):
         page.add(
             ft.Container(
                 content=ft.Text("Vendas", size=30, color=ft.colors.BLACK),
+                alignment=ft.alignment.center,
+                expand=True
             )
         )
         page.update()
+
     def Voltar(e):
         page.clean()
         page.add(background_image)
         page.update()
+
     # Barra de aplicativos com menu de popup
     page.appbar = ft.AppBar(
         leading=ft.Icon(ft.icons.STORAGE),
