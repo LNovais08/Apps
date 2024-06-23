@@ -97,7 +97,7 @@ def main(page: Page):
         data_grid = DataTable(columns=columns, 
                               rows=[],
                               width=1000,
-                              height=225
+                              height=850
                     )
 
         linha1 = ft.Row(
@@ -113,7 +113,7 @@ def main(page: Page):
         principal = ft.Container(
             content=ft.Column(
                 controls=[linha1, linha2],
-                alignment=ft.MainAxisAlignment.START,  # Align start 
+                alignment=ft.MainAxisAlignment.SPACE_AROUND,  # Align start 
                 expand=True
             ),
             bgcolor=ft.colors.WHITE,
