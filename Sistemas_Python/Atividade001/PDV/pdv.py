@@ -21,31 +21,47 @@ def main(page: Page):
     def PDV(e):
         page.clean()
         
-        def minus_click(e):
-            if txt_number.value.isdigit() and int(txt_number.value) > 0:
-                txt_number.value = str(int(txt_number.value) - 1)
-            page.update()
-
-        def plus_click(e):
-            txt_number.value = str(int(txt_number.value) + 1)
-            page.update()
-        
         def add_to_list(e):
             if Codigo.value and Produto.value and txt_valor.value and txt_number.value.isdigit():
                 items.append([Codigo.value, Produto.value, txt_number.value, txt_valor.value])
                 update_table()
                 Codigo.value = ""
                 Produto.value = ""
-                txt_number.value = "0"
-                txt_valor.value = "0"
+                txt_number.value = ""
+                txt_valor.value = ""
                 page.update()
+        
+        def delete_item(index):
+            def delete_click(e):
+                items.pop(index)
+                update_table()
+            return delete_click
+        
+        def edit_item(index):
+            def edit_click(e):
+                Codigo.value, Produto.value, txt_number.value, txt_valor.value = items[index]
+                items.pop(index)
+                update_table()
+            return edit_click
         
         def update_table():
             rows = []
             for index, row in enumerate(items):
                 row_color = ft.colors.GREY_200 if index % 2 == 0 else ft.colors.GREY_400
                 rows.append(DataRow(
-                    cells=[DataCell(Text(cell, color=ft.colors.BLACK)) for cell in row],
+                    cells=[
+                        DataCell(Text(cell, color=ft.colors.BLACK)) for cell in row
+                    ] + [
+                        DataCell(
+                            Row(
+                                controls=[
+                                    IconButton(icon=ft.icons.DELETE, on_click=delete_item(index), icon_color="red"),
+                                    IconButton(icon=ft.icons.EDIT, on_click=edit_item(index), icon_color="green")
+                                ],
+                                alignment=ft.MainAxisAlignment.CENTER
+                            )
+                        )
+                    ],  
                     color=row_color
                 ))
             data_grid.rows = rows
@@ -60,7 +76,7 @@ def main(page: Page):
         adicionar = ft.ElevatedButton(
             text="Adicionar",
             width=120,
-            height=35,
+            height=55,
             color="white",
             style=ft.ButtonStyle(
                 shape={"": ft.RoundedRectangleBorder(radius=5)}  # Cantos retos
@@ -73,15 +89,28 @@ def main(page: Page):
             DataColumn(Text("Código", color=ft.colors.BLACK)),
             DataColumn(Text("Produto", color=ft.colors.BLACK)),
             DataColumn(Text("Quantidade", color=ft.colors.BLACK)),
-            DataColumn(Text("Valor Unitário", color=ft.colors.BLACK))
+            DataColumn(Text("Valor Unitário", color=ft.colors.BLACK)),
+            DataColumn(Text("", color=ft.colors.BLACK))
         ]
         
         # Criando o DataGrid com as colunas definidas
         data_grid = DataTable(columns=columns, 
                               rows=[],
-                              width=550,
+                              width=900,
                               height=225
                     )
+
+        data_grid_container = ft.Container(
+            content=data_grid,
+            width=900,
+            height=225
+        )
+
+        scrollable_data_grid = ft.ListView(
+            controls=[data_grid_container],
+            expand=True,
+            spacing=10
+        )
 
         linha1 = ft.Row(
             controls=[Codigo, Produto, txt_number, txt_valor, adicionar],
@@ -89,14 +118,14 @@ def main(page: Page):
             expand=True
         )
         linha2 = ft.Container(
-            content=data_grid,
-            alignment=ft.alignment.center,
+            content=scrollable_data_grid,
+            alignment=ft.alignment.top_center,  # Align top center horizontal alignment
             expand=True
         )
         principal = ft.Container(
             content=ft.Column(
                 controls=[linha1, linha2],
-                alignment=ft.MainAxisAlignment.CENTER,
+                alignment=ft.MainAxisAlignment.START,  # Align start 
                 expand=True
             ),
             bgcolor=ft.colors.WHITE,
@@ -144,7 +173,7 @@ def main(page: Page):
         page.add(background_image)
         page.update()
 
-    # Barra de aplicativos com menu de popup
+    # Barra de aplicativos com menu
     page.appbar = ft.AppBar(
         leading=ft.Icon(ft.icons.STORAGE),
         leading_width=40,
