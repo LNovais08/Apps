@@ -96,21 +96,9 @@ def main(page: Page):
         # Criando o DataGrid com as colunas definidas
         data_grid = DataTable(columns=columns, 
                               rows=[],
-                              width=900,
+                              width=1000,
                               height=225
                     )
-
-        data_grid_container = ft.Container(
-            content=data_grid,
-            width=900,
-            height=225
-        )
-
-        scrollable_data_grid = ft.ListView(
-            controls=[data_grid_container],
-            expand=True,
-            spacing=10
-        )
 
         linha1 = ft.Row(
             controls=[Codigo, Produto, txt_number, txt_valor, adicionar],
@@ -118,7 +106,7 @@ def main(page: Page):
             expand=True
         )
         linha2 = ft.Container(
-            content=scrollable_data_grid,
+            content=data_grid,
             alignment=ft.alignment.top_center,  # Align top center horizontal alignment
             expand=True
         )
