@@ -97,8 +97,11 @@ def main(page: Page):
         data_grid = DataTable(columns=columns, 
                               rows=[],
                               width=1000,
-                              height=850
+                              border=ft.border.all(2, "black"),
+                              show_bottom_border=True,
                     )
+        cv = ft.Column([data_grid],scroll=True)
+        rv = ft.Row([cv],scroll=True,expand=1,vertical_alignment=ft.CrossAxisAlignment.START)
 
         linha1 = ft.Row(
             controls=[Codigo, Produto, txt_number, txt_valor, adicionar],
@@ -106,7 +109,7 @@ def main(page: Page):
             expand=True
         )
         linha2 = ft.Container(
-            content=data_grid,
+            content=rv,
             alignment=ft.alignment.top_center,  # Align top center horizontal alignment
             expand=True
         )
