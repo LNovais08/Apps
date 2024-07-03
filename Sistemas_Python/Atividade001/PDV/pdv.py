@@ -5,17 +5,17 @@ import sqlite3
 class App:
 
     def  __init__(self,page: Page):
-        
+        self.page = page
         # título da Barra
-        page.title = "SuperMarket"
+        self.page.title = "SuperMarket"
         # proibindo o redimensionamento da Tela
-        page.window_resizable = False
+        self.page.window_resizable = False
         # alinhamento da view
-        page.vertical_alignment = ft.MainAxisAlignment.CENTER  # vertical
-        page.horizontal_alignment = ft.CrossAxisAlignment.CENTER # horizontal
+        self.page.vertical_alignment = ft.MainAxisAlignment.CENTER  # vertical
+        self.page.horizontal_alignment = ft.CrossAxisAlignment.CENTER # horizontal
         # padding da page
-        page.padding = 40
-        page.bgcolor = "WHITE"
+        self.page.padding = 40
+        self.page.bgcolor = "WHITE"
         # Variáveis globais
         items = []
 
@@ -33,7 +33,7 @@ class App:
 
         # Funções de navegação
         def PDV(e):
-            page.clean()
+            self.page.clean()
             
             def add_to_list(e):
                 if Codigo.value and Produto.value and txt_valor.value and txt_number.value.isdigit():
@@ -43,7 +43,7 @@ class App:
                     Produto.value = ""
                     txt_number.value = ""
                     txt_valor.value = ""
-                    page.update()
+                    self.page.update()
             
             def delete_item(index):
                 def delete_click(e):
@@ -79,7 +79,7 @@ class App:
                         color=row_color
                     ))
                 data_grid.rows = rows
-                page.update()
+                self.page.update()
 
             # Itens para PDV
             Codigo = ft.TextField(label="Código", width=150, color="black", text_size=15)
@@ -137,11 +137,11 @@ class App:
                 alignment=ft.alignment.center,
                 expand=True
             )
-            page.add(principal)
-            page.update()
+            self.page.add(principal)
+            self.page.update()
 
         def CadastroU(e):
-            page.clean()
+            self.page.clean()
 
             def link_clicked(e):
                 nome1 = Nome.value
@@ -151,19 +151,19 @@ class App:
                 senha1 = senha.value
                 if not email1:
                     Email.error_text = "Preencha seu E-mail"
-                    page.update()
+                    self.page.update()
                 elif not senha1:
                     senha.error_text = "Preencha sua Senha"
-                    page.update()
+                    self.page.update()
                 elif not nome1:
                     Nome.error_text = "Preencha seu Nome"
-                    page.update()
+                    self.page.update()
                 elif not sexo1:
                     sexo.error_text = "Preencha qual o seu Sexo"
-                    page.update()
+                    self.page.update()
                 elif not tel1:
                     Tel.error_text = "Preencha seu Telefone"
-                    page.update()
+                    self.page.update()
                 else:
                     # Conecta ao banco de dados e insere os valores
                     conn = sqlite3.connect('Atividade001/PDV/db/cadastrosU.db')
@@ -176,7 +176,7 @@ class App:
                     Email.value = ""
                     sexo.value = ""
                     senha.value = ""
-                    page.update()
+                    self.page.update()
             
             # Função para formatar e validar o telefone
             def format_telefone(e):
@@ -189,7 +189,7 @@ class App:
                 elif len(raw_tel) > 2:
                     formatted_tel = f"({raw_tel[:2]}) {raw_tel[2:]}"
                 Tel.value = formatted_tel
-                page.update()
+                self.page.update()
 
             # Itens para Cadastro de Usuário
             Nome = ft.TextField(label="Nome", width=450, color="black", text_size=15, border_color="gray")
@@ -242,7 +242,7 @@ class App:
             )
 
             # Adicionando o contêiner à página
-            page.add(
+            self.page.add(
                 ft.Container(
                     content=form_container,
                     alignment=ft.alignment.center,
@@ -251,37 +251,37 @@ class App:
                     image_fit=ft.ImageFit.COVER,
                 )
             )
-            page.update()
+            self.page.update()
 
         def CadastroP(e):
-            page.clean()
-            page.add(
+            self.page.clean()
+            self.page.add(
                 ft.Container(
                     content=ft.Text("Cadastro Produto", size=30, color=ft.colors.BLACK),
                     alignment=ft.alignment.center,
                     expand=True
                 )
             )
-            page.update()
+            self.page.update()
 
         def Vendas(e):
-            page.clean()
-            page.add(
+            self.page.clean()
+            self.page.add(
                 ft.Container(
                     content=ft.Text("Vendas", size=30, color=ft.colors.BLACK),
                     alignment=ft.alignment.center,
                     expand=True
                 )
             )
-            page.update()
+            self.page.update()
 
         def Voltar(e):
-            page.clean()
-            page.add(background_image)
-            page.update()
+            self.page.clean()
+            self.page.add(background_image)
+            self.page.update()
 
         # Barra de aplicativos com menu
-        page.appbar = ft.AppBar(
+        self.page.appbar = ft.AppBar(
             leading=ft.Icon(ft.icons.STORAGE),
             leading_width=40,
             title=ft.Text("SuperMarket"),
@@ -307,7 +307,7 @@ class App:
             expand=True
         )
 
-        page.add(background_image)
-        page.update()
+        self.page.add(background_image)
+        self.page.update()
 
 ft.app(target=App)
