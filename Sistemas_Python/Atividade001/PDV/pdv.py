@@ -17,6 +17,18 @@ def main(page: Page):
     # Variáveis globais
     items = []
 
+    # Função para conectar ao banco de dados e criar a tabela se não existir
+    def init_db():
+        conn = sqlite3.connect('Atividade001/PDV/db/cadastrosU.db')
+        cursor = conn.cursor()
+        cursor.execute('''CREATE TABLE IF NOT EXISTS cadastros_Usuarios
+                          (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, Tel TEXT, email TEXT, sexo TEXT, senha TEXT)''')
+        conn.commit()
+        conn.close()
+
+    # Inicializa o banco de dados
+    init_db()
+
     # Funções de navegação
     def PDV(e):
         page.clean()
@@ -128,11 +140,113 @@ def main(page: Page):
 
     def CadastroU(e):
         page.clean()
+
+        def link_clicked(e):
+            nome1 = Nome.value
+            tel1 = Tel.value
+            email1 = Email.value
+            sexo1 = sexo.value
+            senha1 = senha.value
+            if not email1:
+                Email.error_text = "Preencha seu E-mail"
+                page.update()
+            elif not senha1:
+                senha.error_text = "Preencha sua Senha"
+                page.update()
+            elif not nome1:
+                Nome.error_text = "Preencha seu Nome"
+                page.update()
+            elif not sexo1:
+                sexo.error_text = "Preencha qual o seu Sexo"
+                page.update()
+            elif not tel1:
+                Tel.error_text = "Preencha seu Telefone"
+                page.update()
+            else:
+                # Conecta ao banco de dados e insere os valores
+                conn = sqlite3.connect('Atividade001/PDV/db/cadastrosU.db')
+                cursor = conn.cursor()
+                cursor.execute("INSERT INTO cadastros_Usuarios (nome, Tel, email, sexo, senha) VALUES (?, ?, ?, ?, ?)", (nome1, tel1, email1, sexo1, senha1))
+                conn.commit()
+                conn.close()
+                Nome.value = ""
+                Tel.value = ""
+                Email.value = ""
+                sexo.value = ""
+                senha.value = ""
+                page.update()
+        
+        # Função para formatar e validar o telefone
+        def format_telefone(e):
+            raw_tel = ''.join(filter(str.isdigit, Tel.value))[:11]  # Somente dígitos e max 11 caracteres
+            formatted_tel = raw_tel
+            if len(raw_tel) > 10:
+                formatted_tel = f"({raw_tel[:2]}) {raw_tel[2:7]}-{raw_tel[7:11]}"
+            elif len(raw_tel) > 6:
+                formatted_tel = f"({raw_tel[:2]}) {raw_tel[2:6]}-{raw_tel[6:]}"
+            elif len(raw_tel) > 2:
+                formatted_tel = f"({raw_tel[:2]}) {raw_tel[2:]}"
+            Tel.value = formatted_tel
+            page.update()
+
+        # Itens para Cadastro de Usuário
+        Nome = ft.TextField(label="Nome", width=450, color="black", text_size=15, border_color="gray")
+        Tel = ft.TextField(label="Telefone", width=450, color="black", text_size=15, border_color="gray", on_change=format_telefone)
+        Email = ft.TextField(label="E-mail", text_align=ft.TextAlign.CENTER, width=450, color="black", border_color="gray")
+        sexo = ft.RadioGroup(
+            content=ft.Row([
+                ft.Radio(value="Feminino", label="Feminino"),
+                ft.Radio(value="Masculino", label="Masculino")
+            ], alignment=ft.MainAxisAlignment.CENTER),
+        ) 
+        senha = ft.TextField(label="Senha", width=450, color="black", password=True, can_reveal_password=True, text_size=15, border_color="gray")
+        
+        # Botão de Cadastro
+        cadastrar_button = ft.ElevatedButton(
+            text="Cadastrar",
+            on_click=link_clicked,
+            style=ft.ButtonStyle(
+                shape={"": ft.RoundedRectangleBorder(radius=5)},
+                color="white",
+                bgcolor="gray"
+            ),
+            width=200,
+            height=50,
+        )
+    
+        # Layout do formulário
+        cadastrou = ft.Column(
+            controls=[Nome, Tel, Email, sexo, senha, cadastrar_button],
+            alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            spacing=20
+        )
+        
+        # Contêiner principal com estilos
+        form_container = ft.Container(
+            content=cadastrou,
+            width=500,
+            padding=20,
+            margin=20,
+            border_radius=10,
+            bgcolor=ft.colors.WHITE,
+            shadow=ft.BoxShadow(
+                blur_radius=10,
+                color="black",
+                offset=ft.Offset(5, 5),
+                spread_radius=1,
+            ),
+            alignment=ft.alignment.center,
+        )
+
+        # Adicionando o contêiner à página
         page.add(
             ft.Container(
-                content=ft.Text("Cadastro Usuário!", size=30, color=ft.colors.BLACK),
+                content=form_container,
                 alignment=ft.alignment.center,
-                expand=True
+                expand=True,
+                image_src="Atividade001/PDV/img/Foto.jpg",
+                image_fit=ft.ImageFit.COVER,
             )
         )
         page.update()
