@@ -36,7 +36,7 @@ class App:
                         ft.PopupMenuItem(text="Cadastro Usuário", icon="APP_REGISTRATION", on_click=self.show_cadastro_usuario),
                         ft.PopupMenuItem(text="Cadastro Produto", icon="APP_REGISTRATION", on_click=self.show_cadastro_produto),
                         ft.PopupMenuItem(text="Vendas", icon="SELL", on_click=self.show_vendas),
-                        ft.PopupMenuItem(text="Home", icon="OUTBOND", on_click=self.show_home)
+                        ft.PopupMenuItem(text="Home", icon="HOME", on_click=self.show_home)
                     ]
                 ),
             ],
@@ -46,28 +46,36 @@ class App:
         self.show_home(None)
 
     def show_pdv(self, e):
+        self.hide_background_image()
         if self.current_page:
+            self.page.controls.remove(self.current_page)  # Remove a página atual
             self.current_page.visible = False  # Esconde a página atual, se existir
         self.current_page = self.create_pdv_page()
         self.page.add(self.current_page)
         self.page.update()
 
     def show_cadastro_usuario(self, e):
+        self.hide_background_image()
         if self.current_page:
+            self.page.controls.remove(self.current_page)  # Remove a página atual
             self.current_page.visible = False
         self.current_page = self.create_cadastro_usuario_page()
         self.page.add(self.current_page)
         self.page.update()
 
     def show_cadastro_produto(self, e):
+        self.hide_background_image()
         if self.current_page:
+            self.page.controls.remove(self.current_page)  # Remove a página atual
             self.current_page.visible = False
         self.current_page = self.create_cadastro_produto_page()
         self.page.add(self.current_page)
         self.page.update()
 
     def show_vendas(self, e):
+        self.hide_background_image()
         if self.current_page:
+            self.page.controls.remove(self.current_page)  # Remove a página atual
             self.current_page.visible = False
         self.current_page = self.create_vendas_page()
         self.page.add(self.current_page)
@@ -75,10 +83,18 @@ class App:
 
     def show_home(self, e):
         if self.current_page:
+            self.page.controls.remove(self.current_page)  # Remove a página atual
             self.current_page.visible = False  # Esconde a página atual, se existir
-        self.page.add(self.background_image)  # Adiciona a camada de fundo de volta
+            self.current_page = None
+        if self.background_image not in self.page.controls:
+            self.page.controls.append(self.background_image)  # Adiciona a camada de fundo de volta
         self.page.update()
 
+    def hide_background_image(self):
+        if self.background_image in self.page.controls:
+            self.page.controls.remove(self.background_image)
+            self.page.update()
+    
     def create_pdv_page(self):
         # Exemplo de criação da página PDV
         items = []
@@ -158,12 +174,13 @@ class App:
         # Criando o DataGrid com as colunas definidas
         data_grid = DataTable(columns=columns, 
                             rows=[],
-                            width=1000,
+                            width=800,
                             border=ft.border.all(2, "black"),
                             show_bottom_border=True,
                     )
         cv = ft.Column([data_grid],scroll=True)
         rv = ft.Row([cv],scroll=True,expand=1,vertical_alignment=ft.CrossAxisAlignment.START)
+
 
         linha1 = ft.Row(
             controls=[Codigo, Produto, txt_number, txt_valor, adicionar],
@@ -175,10 +192,41 @@ class App:
             alignment=ft.alignment.top_center,  # Align top center horizontal alignment
             expand=True
         )
+        # Contêiner adicional para contador e botões
+        total_text = ft.Text("Total: R$ 0.00", size=20, color=ft.colors.BLACK)
+        pagar_button = ft.ElevatedButton(
+            text="Pagar",
+            width=120,
+            height=55,
+            color="white",
+            style=ft.ButtonStyle(
+                shape={"": ft.RoundedRectangleBorder(radius=5)}
+            ),
+            on_click=lambda e: print("Pagamento realizado!")
+        )
+        cancelar_button = ft.ElevatedButton(
+            text="Cancelar",
+            width=120,
+            height=55,
+            color="white",
+            style=ft.ButtonStyle(
+                shape={"": ft.RoundedRectangleBorder(radius=5)}
+            ),
+            on_click=lambda e: print("Operação cancelada!")
+        )
+        linha3 = ft.Row(
+            controls=[total_text, pagar_button, cancelar_button],
+            alignment=ft.MainAxisAlignment.CENTER
+        )
+        linha4 = ft.Row(
+            controls=[linha2, linha3],
+            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+            expand=True
+        )
         principal = ft.Container(
             content=ft.Column(
-                controls=[linha1, linha2],
-                alignment=ft.MainAxisAlignment.SPACE_AROUND,  # Align start 
+                controls=[linha1, linha4],
+                alignment=ft.MainAxisAlignment.SPACE_AROUND,  # Alinhamento espaçado
                 expand=True
             ),
             bgcolor=ft.colors.WHITE,
