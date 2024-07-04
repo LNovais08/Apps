@@ -1,6 +1,9 @@
 from flet import *
 import flet as ft
 import sqlite3
+from datetime import datetime
+import json
+
 
 class App:
 
@@ -157,7 +160,7 @@ class App:
                     ft.Radio(value="cartao", label="Cartão"),
                     ft.Radio(value="dinheiro", label="Dinheiro"),
                     ft.Radio(value="pix", label="Pix"),
-                ], width=200)  # Define a largura do grupo de rádio
+                ], width=300)  # Define a largura do grupo de rádio
             )
 
             def on_ok_click(e):
@@ -177,6 +180,27 @@ class App:
 
             def close_second_modal(modal):
                 modal.open = False
+                # Obtém a data e hora atuais
+                now = datetime.now()
+                # Formata a data e hora como string
+                data = now.strftime("%Y-%m-%d %H:%M:%S")
+                User1 = "Lais"
+                Compras = [item[1] for item in items]  # Pega todos os valores da coluna "Produto"
+                Compras1 = json.dumps(Compras)
+                Valor1 = total_text.value
+                Data1 = data
+                Estado1 = "Pago"
+                # Conecta ao banco de dados e insere os valores
+                conn = sqlite3.connect('Atividade001/PDV/db/cadastrosU.db')
+                cursor = conn.cursor()
+                cursor.execute("INSERT INTO Vendas (User, Compras, Valor_Total, Data, Estado) VALUES (?, ?, ?, ?, ?)", (User1, Compras1, Valor1, Data1, Estado1))
+                conn.commit()
+                conn.close()
+                Codigo.value = ""
+                Produto.value = ""
+                txt_number.value = ""
+                txt_valor.value = ""
+                total_text.value = ""
                 self.page.update()
 
             modal = ft.AlertDialog(
@@ -188,7 +212,7 @@ class App:
                         selected_payment
                     ],
                     width=300, 
-                    height=100  
+                    height=150  
                 ),
                 actions=[
                     ft.TextButton("OK", on_click=on_ok_click),
@@ -200,7 +224,46 @@ class App:
             self.page.update()
 
 
+        def cancelar(e):
 
+
+            def on_ok_click(e):
+                # Mostrar outro modal com a opção de pagamento selecionada
+                second_modal = ft.AlertDialog(
+                    modal=True,
+                    title=ft.Text("Confirmar Cancelamento"),
+                    content=ft.Text(f"Sua Compra está sendo cancelada..."),
+                    actions=[
+                        ft.TextButton("OK", on_click=lambda e: close_second_modal(second_modal)),
+                    ],
+                    actions_alignment=ft.MainAxisAlignment.END
+                )
+                self.page.dialog = second_modal
+                second_modal.open = True
+                self.page.update()
+
+            def close_second_modal(modal):
+                modal.open = False
+                Codigo.value = ""
+                Produto.value = ""
+                txt_number.value = ""
+                txt_valor.value = ""
+                total_text.value = ""
+                items.clear()
+                update_table()
+                self.page.update()
+
+            modal = ft.AlertDialog(
+                modal=True,
+                title=ft.Text("Você está cancelando sua compra!"),
+                actions=[
+                    ft.TextButton("OK", on_click=on_ok_click),
+                ],
+                actions_alignment=ft.MainAxisAlignment.END
+            )
+            self.page.dialog = modal
+            modal.open = True
+            self.page.update()
         # Itens para PDV
         Codigo = ft.TextField(label="Código", width=150, color="black", text_size=15)
         Produto = ft.TextField(label="Produto", width=450, color="black", text_size=15)
@@ -270,7 +333,7 @@ class App:
             style=ft.ButtonStyle(
                 shape={"": ft.RoundedRectangleBorder(radius=5)}
             ),
-            on_click=pagar
+            on_click=cancelar
         )
         linha3 = ft.Row(
             controls=[total_text, pagar_button, cancelar_button],
