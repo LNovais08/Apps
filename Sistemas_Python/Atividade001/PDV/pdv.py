@@ -99,6 +99,11 @@ class App:
         # Exemplo de criação da página PDV
         items = []
 
+        def update_total():
+            total = sum(float(row[2]) * float(row[3]) for row in items)
+            total_text.value = f"Total: R$ {total:.2f}"
+            self.page.update()
+
         def add_to_list(e):
             if Codigo.value and Produto.value and txt_valor.value and txt_number.value.isdigit():
                 items.append([Codigo.value, Produto.value, txt_number.value, txt_valor.value])
@@ -108,6 +113,7 @@ class App:
                 txt_number.value = ""
                 txt_valor.value = ""
                 self.page.update()
+                update_total()
         
         def delete_item(index):
             def delete_click(e):
@@ -145,6 +151,8 @@ class App:
             data_grid.rows = rows
             self.page.update()
 
+        
+
         # Itens para PDV
         Codigo = ft.TextField(label="Código", width=150, color="black", text_size=15)
         Produto = ft.TextField(label="Produto", width=450, color="black", text_size=15)
@@ -161,7 +169,7 @@ class App:
             ),
             on_click=add_to_list
         )
-        
+
         # Definindo as colunas do DataGrid
         columns = [
             DataColumn(Text("Código", color=ft.colors.BLACK)),
@@ -170,17 +178,18 @@ class App:
             DataColumn(Text("Valor Unitário", color=ft.colors.BLACK)),
             DataColumn(Text("", color=ft.colors.BLACK))
         ]
-        
-        # Criando o DataGrid com as colunas definidas
-        data_grid = DataTable(columns=columns, 
-                            rows=[],
-                            width=800,
-                            border=ft.border.all(2, "black"),
-                            show_bottom_border=True,
-                    )
-        cv = ft.Column([data_grid],scroll=True)
-        rv = ft.Row([cv],scroll=True,expand=1,vertical_alignment=ft.CrossAxisAlignment.START)
 
+        # Criando o DataGrid com as colunas definidas
+        data_grid = DataTable(
+            columns=columns,
+            rows=[],
+            width=800,
+            border=ft.border.all(2, "black"),
+            show_bottom_border=True,
+        )
+
+        cv = ft.Column([data_grid], scroll=True)
+        rv = ft.Row([cv], scroll=True, expand=1, vertical_alignment=ft.CrossAxisAlignment.START)
 
         linha1 = ft.Row(
             controls=[Codigo, Produto, txt_number, txt_valor, adicionar],
@@ -189,15 +198,16 @@ class App:
         )
         linha2 = ft.Container(
             content=rv,
-            alignment=ft.alignment.top_center,  # Align top center horizontal alignment
+            alignment=ft.alignment.top_center,  # Alinhar ao topo central
             expand=True
         )
+
         # Contêiner adicional para contador e botões
         total_text = ft.Text("Total: R$ 0.00", size=20, color=ft.colors.BLACK)
         pagar_button = ft.ElevatedButton(
             text="Pagar",
             width=120,
-            height=55,
+            height=35,
             color="white",
             style=ft.ButtonStyle(
                 shape={"": ft.RoundedRectangleBorder(radius=5)}
@@ -207,7 +217,7 @@ class App:
         cancelar_button = ft.ElevatedButton(
             text="Cancelar",
             width=120,
-            height=55,
+            height=35,
             color="white",
             style=ft.ButtonStyle(
                 shape={"": ft.RoundedRectangleBorder(radius=5)}
@@ -218,15 +228,11 @@ class App:
             controls=[total_text, pagar_button, cancelar_button],
             alignment=ft.MainAxisAlignment.CENTER
         )
-        linha4 = ft.Row(
-            controls=[linha2, linha3],
-            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-            expand=True
-        )
+
         principal = ft.Container(
             content=ft.Column(
-                controls=[linha1, linha4],
-                alignment=ft.MainAxisAlignment.SPACE_AROUND,  # Alinhamento espaçado
+                controls=[linha1, linha2, linha3],
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,  # Alinhamento espaçado
                 expand=True
             ),
             bgcolor=ft.colors.WHITE,
