@@ -244,6 +244,22 @@ class App:
 
             def close_second_modal(modal):
                 modal.open = False
+                # Obtém a data e hora atuais
+                now = datetime.now()
+                # Formata a data e hora como string
+                data = now.strftime("%Y-%m-%d %H:%M:%S")
+                User1 = "Lais"
+                Compras = [item[1] for item in items]  # Pega todos os valores da coluna "Produto"
+                Compras1 = json.dumps(Compras)
+                Valor1 = total_text.value
+                Data1 = data
+                Estado1 = "Cancelado"
+                # Conecta ao banco de dados e insere os valores
+                conn = sqlite3.connect('Atividade001/PDV/db/cadastrosU.db')
+                cursor = conn.cursor()
+                cursor.execute("INSERT INTO Vendas (User, Compras, Valor_Total, Data, Estado) VALUES (?, ?, ?, ?, ?)", (User1, Compras1, Valor1, Data1, Estado1))
+                conn.commit()
+                conn.close()
                 Codigo.value = ""
                 Produto.value = ""
                 txt_number.value = ""
