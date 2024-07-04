@@ -151,7 +151,55 @@ class App:
             data_grid.rows = rows
             self.page.update()
 
-        
+        def pagar(e):
+            selected_payment = ft.RadioGroup(
+                content=ft.Column([
+                    ft.Radio(value="cartao", label="Cartão"),
+                    ft.Radio(value="dinheiro", label="Dinheiro"),
+                    ft.Radio(value="pix", label="Pix"),
+                ], width=200)  # Define a largura do grupo de rádio
+            )
+
+            def on_ok_click(e):
+                # Mostrar outro modal com a opção de pagamento selecionada
+                second_modal = ft.AlertDialog(
+                    modal=True,
+                    title=ft.Text("Confirmar Pagamento"),
+                    content=ft.Text(f"Forma de Pagamento escolhida: {selected_payment.value}"),
+                    actions=[
+                        ft.TextButton("OK", on_click=lambda e: close_second_modal(second_modal)),
+                    ],
+                    actions_alignment=ft.MainAxisAlignment.END
+                )
+                self.page.dialog = second_modal
+                second_modal.open = True
+                self.page.update()
+
+            def close_second_modal(modal):
+                modal.open = False
+                self.page.update()
+
+            modal = ft.AlertDialog(
+                modal=True,
+                title=ft.Text("Escolha o modo de Pagamento!"),
+                content=ft.Column(
+                    controls=[
+                        ft.Text("Forma de Pagamento -> Cartão, Dinheiro ou Pix"),
+                        selected_payment
+                    ],
+                    width=300, 
+                    height=100  
+                ),
+                actions=[
+                    ft.TextButton("OK", on_click=on_ok_click),
+                ],
+                actions_alignment=ft.MainAxisAlignment.END
+            )
+            self.page.dialog = modal
+            modal.open = True
+            self.page.update()
+
+
 
         # Itens para PDV
         Codigo = ft.TextField(label="Código", width=150, color="black", text_size=15)
@@ -212,7 +260,7 @@ class App:
             style=ft.ButtonStyle(
                 shape={"": ft.RoundedRectangleBorder(radius=5)}
             ),
-            on_click=lambda e: print("Pagamento realizado!")
+            on_click=pagar
         )
         cancelar_button = ft.ElevatedButton(
             text="Cancelar",
@@ -222,7 +270,7 @@ class App:
             style=ft.ButtonStyle(
                 shape={"": ft.RoundedRectangleBorder(radius=5)}
             ),
-            on_click=lambda e: print("Operação cancelada!")
+            on_click=pagar
         )
         linha3 = ft.Row(
             controls=[total_text, pagar_button, cancelar_button],
