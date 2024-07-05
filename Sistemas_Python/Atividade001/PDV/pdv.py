@@ -3,7 +3,7 @@ import flet as ft
 import sqlite3
 from datetime import datetime
 import json
-
+import unidecode
 
 class App:
 
@@ -185,7 +185,7 @@ class App:
                 # Formata a data e hora como string
                 data = now.strftime("%Y-%m-%d %H:%M:%S")
                 User1 = "Lais"
-                Compras = [item[1] for item in items]  # Pega todos os valores da coluna "Produto"
+                Compras = [unidecode.unidecode(item[1]) for item in items]  # Pega todos os valores da coluna "Produto"
                 Compras1 = json.dumps(Compras)
                 Valor1 = total_text.value
                 Data1 = data
@@ -249,7 +249,7 @@ class App:
                 # Formata a data e hora como string
                 data = now.strftime("%Y-%m-%d %H:%M:%S")
                 User1 = "Lais"
-                Compras = [item[1] for item in items]  # Pega todos os valores da coluna "Produto"
+                Compras = [unidecode.unidecode(item[1]) for item in items]   # Pega todos os valores da coluna "Produto"
                 Compras1 = json.dumps(Compras)
                 Valor1 = total_text.value
                 Data1 = data
