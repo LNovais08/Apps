@@ -4,9 +4,10 @@ import sqlite3
 from datetime import datetime
 import json
 import unidecode
-from flet.plotly_chart import PlotlyChart
-import pandas as pd
-import plotly.express as px
+import matplotlib
+import matplotlib.pyplot as plt
+from flet.matplotlib_chart import MatplotlibChart
+
 
 class App:
 
@@ -204,6 +205,7 @@ class App:
                 txt_number.value = ""
                 txt_valor.value = ""
                 total_text.value = ""
+                items.clear()
                 self.page.update()
 
             modal = ft.AlertDialog(
@@ -503,33 +505,27 @@ class App:
         )
 
     def create_vendas_page(self):
-        # Conectar ao banco de dados SQLite
+        # Connect to the database and fetch sales data
         conn = sqlite3.connect('Atividade001/PDV/db/cadastrosU.db')
         cursor = conn.cursor()
-
-        # Executar a consulta SQL para obter os dados de vendas
-        cursor.execute("SELECT Data, Valor_Total, Estado FROM Vendas")
-        rows = cursor.fetchall()
+        cursor.execute("SELECT Valor_Total, Data, Estado FROM Vendas")
+        vendas_data = cursor.fetchall()
         conn.close()
 
-        # Usar pandas para transformar os dados em um DataFrame
-        df = pd.DataFrame(rows, columns=['Data', 'Valor_Total', 'Estado'])
+        for i in vendas_data:
+            total = f"{i[0]}"
+            data = f"{i[1]}"
+            estado = f"{i[2]}"
 
-        # Filtrar os dados para considerar apenas as vendas pagas e canceladas
-        df['Valor_Total'] = df.apply(lambda row: row['Valor_Total'] if row['Estado'] == 'Pago' else row['Valor_Total'], axis=1)
-        df_grouped = df.groupby('Data')['Valor_Total'].sum().reset_index()
 
-        # Criar o gráfico de vendas usando Plotly Express
-        fig = px.line(df_grouped, x='Data', y='Valor_Total', title='Gráfico de Vendas')
-
-        # Exibir o gráfico na interface
-        graph = PlotlyChart(fig)
-        vendas_container = ft.Container(
-            content=graph,
+        return ft.Container(
+            content= ft.Row([
+                ft.Text(total, size=30, color=ft.colors.BLACK),
+                ft.Text(data, size=30, color=ft.colors.BLACK),
+                ft.Text(estado, size=30, color=ft.colors.BLACK)
+            ]),
             alignment=ft.alignment.center,
             expand=True
         )
-
-        return vendas_container
 
 ft.app(target=App)
