@@ -4,6 +4,9 @@ import sqlite3
 from datetime import datetime
 import json
 import unidecode
+from flet.plotly_chart import PlotlyChart
+import pandas as pd
+import plotly.express as px
 
 class App:
 
@@ -377,6 +380,7 @@ class App:
             email1 = Email.value
             sexo1 = sexo.value
             senha1 = senha.value
+            adm1 = adm.value
             if not email1:
                 Email.error_text = "Preencha seu E-mail"
                 self.page.update()
@@ -396,13 +400,14 @@ class App:
                 # Conecta ao banco de dados e insere os valores
                 conn = sqlite3.connect('Atividade001/PDV/db/cadastrosU.db')
                 cursor = conn.cursor()
-                cursor.execute("INSERT INTO cadastros_Usuarios (nome, Tel, email, sexo, senha) VALUES (?, ?, ?, ?, ?)", (nome1, tel1, email1, sexo1, senha1))
+                cursor.execute("INSERT INTO cadastros_Usuarios (nome, Tel, email, sexo, grau, senha) VALUES (?, ?, ?, ?, ?, ?)", (nome1, tel1, email1, sexo1, adm1, senha1))
                 conn.commit()
                 conn.close()
                 Nome.value = ""
                 Tel.value = ""
                 Email.value = ""
                 sexo.value = ""
+                adm.value = ""
                 senha.value = ""
                 self.page.update()
         
@@ -419,6 +424,11 @@ class App:
             Tel.value = formatted_tel
             self.page.update()
 
+        def dropdown_changed(e):
+            adm.value = adm.value
+            self.page.update()
+
+        
         # Itens para Cadastro de Usuário
         Nome = ft.TextField(label="Nome", width=450, color="black", text_size=15, border_color="gray")
         Tel = ft.TextField(label="Telefone", width=450, color="black", text_size=15, border_color="gray", on_change=format_telefone)
@@ -428,6 +438,14 @@ class App:
                 ft.Radio(value="Feminino", label="Feminino"),
                 ft.Radio(value="Masculino", label="Masculino")
             ], alignment=ft.MainAxisAlignment.CENTER),
+        ) 
+        adm = ft.Dropdown(
+            width=450,
+            on_change=dropdown_changed,
+            options=[
+                ft.dropdown.Option("Admin"),
+                ft.dropdown.Option("Funcionário"),
+            ],
         ) 
         senha = ft.TextField(label="Senha", width=450, color="black", password=True, can_reveal_password=True, text_size=15, border_color="gray")
         
@@ -446,7 +464,7 @@ class App:
     
         # Layout do formulário
         cadastrou = ft.Column(
-            controls=[Nome, Tel, Email, sexo, senha, cadastrar_button],
+            controls=[Nome, Tel, Email, sexo, adm, senha, cadastrar_button],
             alignment=ft.MainAxisAlignment.CENTER,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             spacing=20
@@ -485,11 +503,33 @@ class App:
         )
 
     def create_vendas_page(self):
-        # Exemplo de criação da página de Vendas
-        return ft.Container(
-            content=ft.Text("Vendas", size=30, color=ft.colors.BLACK),
+        # Conectar ao banco de dados SQLite
+        conn = sqlite3.connect('Atividade001/PDV/db/cadastrosU.db')
+        cursor = conn.cursor()
+
+        # Executar a consulta SQL para obter os dados de vendas
+        cursor.execute("SELECT Data, Valor_Total, Estado FROM Vendas")
+        rows = cursor.fetchall()
+        conn.close()
+
+        # Usar pandas para transformar os dados em um DataFrame
+        df = pd.DataFrame(rows, columns=['Data', 'Valor_Total', 'Estado'])
+
+        # Filtrar os dados para considerar apenas as vendas pagas e canceladas
+        df['Valor_Total'] = df.apply(lambda row: row['Valor_Total'] if row['Estado'] == 'Pago' else row['Valor_Total'], axis=1)
+        df_grouped = df.groupby('Data')['Valor_Total'].sum().reset_index()
+
+        # Criar o gráfico de vendas usando Plotly Express
+        fig = px.line(df_grouped, x='Data', y='Valor_Total', title='Gráfico de Vendas')
+
+        # Exibir o gráfico na interface
+        graph = PlotlyChart(fig)
+        vendas_container = ft.Container(
+            content=graph,
             alignment=ft.alignment.center,
             expand=True
         )
+
+        return vendas_container
 
 ft.app(target=App)
