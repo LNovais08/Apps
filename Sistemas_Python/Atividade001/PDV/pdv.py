@@ -187,7 +187,7 @@ class App:
                 # Obtém a data e hora atuais
                 now = datetime.now()
                 # Formata a data e hora como string
-                data = now.strftime("%Y-%m-%d %H:%M:%S")
+                data = now.strftime("%Y-%m-%d")
                 User1 = "Lais"
                 Compras = [unidecode.unidecode(item[1]) for item in items]  # Pega todos os valores da coluna "Produto"
                 Compras1 = json.dumps(Compras)
@@ -505,27 +505,26 @@ class App:
         )
 
     def create_vendas_page(self):
-        # Connect to the database and fetch sales data
         conn = sqlite3.connect('Atividade001/PDV/db/cadastrosU.db')
         cursor = conn.cursor()
-        cursor.execute("SELECT Valor_Total, Data, Estado FROM Vendas")
+        cursor.execute("SELECT Valor_Total, Data FROM Vendas")
         vendas_data = cursor.fetchall()
         conn.close()
 
-        for i in vendas_data:
-            total = f"{i[0]}"
-            data = f"{i[1]}"
-            estado = f"{i[2]}"
+        valores = [row[0] for row in vendas_data]
+        datas = [row[1] for row in vendas_data]
 
+        fig, ax = plt.subplots()
+        ax.plot(datas, valores)
+        ax.set_title('Vendas')
+        ax.set_xlabel('Data')
+        ax.set_ylabel('Valor Total')
+
+        chart = MatplotlibChart(fig, expand=True)
 
         return ft.Container(
-            content= ft.Row([
-                ft.Text(total, size=30, color=ft.colors.BLACK),
-                ft.Text(data, size=30, color=ft.colors.BLACK),
-                ft.Text(estado, size=30, color=ft.colors.BLACK)
-            ]),
+            content=chart,
             alignment=ft.alignment.center,
             expand=True
         )
-
 ft.app(target=App)
