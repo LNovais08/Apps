@@ -301,7 +301,45 @@ class App:
             ),
             on_click=add_to_list
         )
+        # Obtém a data e hora atuais
+        now = datetime.now()
+        # Formata a data e hora como string
+        data = now.strftime("%d/%m/%Y")
+        hora = now.strftime("%H:%M:%S")
+        # Define the contents of the labels
+        n_nota = ft.Text(value="N° da Nota", size=25, font_family="Times New Roman", color="black")
+        n_nota_label = ft.Text(value="", size=18, color="black")
 
+        data_label = ft.Text(value="Data: ", size=20, font_family="Times New Roman", color="black")
+        data_value = ft.Text(value=data, size=18, color="black")
+        hora_label = ft.Text(value="Hora: ", size=20, font_family="Times New Roman", color="black")
+        hora_value = ft.Text(value=hora, size=19, color="black")
+
+        # Create containers for each div with proper styling and spacing
+        div1 = ft.Container(
+            content=ft.Column([n_nota, n_nota_label]),
+            alignment=ft.alignment.center,
+            padding=ft.padding.all(20)
+        )
+        div4 = ft.Container(
+            content=ft.Column([data_label, data_value], spacing=10, alignment=ft.alignment.center),
+            alignment=ft.alignment.center,
+            padding=ft.padding.all(20)
+        )
+        div5 = ft.Container(
+            content=ft.Column([hora_label, hora_value], spacing=10, alignment=ft.alignment.center),
+            alignment=ft.alignment.center,
+            padding=ft.padding.all(20)
+        )
+
+        # Create the main navigation container
+        nave = ft.Container(
+            content=ft.Row([div1, div4, div5], spacing=20, alignment=ft.alignment.center),
+            alignment=ft.alignment.center,
+            padding=ft.padding.all(20),
+            bgcolor=ft.colors.GREY_300,
+            border_radius=ft.border_radius.all(10)
+        )
         # Definindo as colunas do DataGrid
         columns = [
             DataColumn(Text("Código", color=ft.colors.BLACK)),
@@ -363,7 +401,7 @@ class App:
 
         principal = ft.Container(
             content=ft.Column(
-                controls=[linha1, linha2, linha3],
+                controls=[nave, linha1, linha2, linha3],
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,  # Alinhamento espaçado
                 expand=True
             ),
