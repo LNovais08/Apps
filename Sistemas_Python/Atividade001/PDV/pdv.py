@@ -301,6 +301,20 @@ class App:
             ),
             on_click=add_to_list
         )
+        # Conecta ao banco de dados e obtém o último id
+        conn = sqlite3.connect('Atividade001/PDV/db/cadastrosU.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT MAX(id) FROM Vendas")
+        result = cursor.fetchone()
+        conn.close()
+        # Se result for None, significa que não há registros na tabela. Então, definimos id como 0.
+        if result[0] is None:
+            id = 0
+        else:
+            id = int(result[0])  # Certifique-se de que id seja um inteiro
+        # Incrementa o id
+        id1 = id + 1
+        id1 = str(id1).zfill(12)
         # Obtém a data e hora atuais
         now = datetime.now()
         # Formata a data e hora como string
@@ -308,12 +322,15 @@ class App:
         hora = now.strftime("%H:%M:%S")
         # Define the contents of the labels
         n_nota = ft.Text(value="N° da Nota", size=25, font_family="Times New Roman", color="black")
-        n_nota_label = ft.Text(value="", size=18, color="black")
+        n_nota_label = ft.Text(value=str(id1), size=18, color="black")
 
         data_label = ft.Text(value="Data: ", size=20, font_family="Times New Roman", color="black")
         data_value = ft.Text(value=data, size=18, color="black")
         hora_label = ft.Text(value="Hora: ", size=20, font_family="Times New Roman", color="black")
         hora_value = ft.Text(value=hora, size=19, color="black")
+
+        cpf_label = ft.Text(value="CPF: ", size=20, font_family="Times New Roman", color="black")
+        cpf_value = ft.TextField(color="black", width=157, height=40, text_size=20)
 
         # Create containers for each div with proper styling and spacing
         div1 = ft.Container(
@@ -321,23 +338,28 @@ class App:
             alignment=ft.alignment.center,
             padding=ft.padding.all(20)
         )
-        div4 = ft.Container(
+        div2 = ft.Container(
             content=ft.Column([data_label, data_value], spacing=10, alignment=ft.alignment.center),
             alignment=ft.alignment.center,
             padding=ft.padding.all(20)
         )
-        div5 = ft.Container(
+        div3 = ft.Container(
             content=ft.Column([hora_label, hora_value], spacing=10, alignment=ft.alignment.center),
             alignment=ft.alignment.center,
             padding=ft.padding.all(20)
         )
-
+        div4 = ft.Container(
+            content=ft.Row([cpf_label, cpf_value], spacing=10, alignment=ft.alignment.center),
+            alignment=ft.alignment.center,
+            padding=ft.padding.all(20)
+        )
         # Create the main navigation container
         nave = ft.Container(
-            content=ft.Row([div1, div4, div5], spacing=20, alignment=ft.alignment.center),
-            alignment=ft.alignment.center,
-            padding=ft.padding.all(20),
+            content=ft.Row([div1, div2, div3, div4], spacing=20, alignment=ft.alignment.center),
+            alignment=ft.alignment.top_center,
+            padding=ft.padding.all(10),
             bgcolor=ft.colors.GREY_300,
+            height=120,
             border_radius=ft.border_radius.all(10)
         )
         # Definindo as colunas do DataGrid
