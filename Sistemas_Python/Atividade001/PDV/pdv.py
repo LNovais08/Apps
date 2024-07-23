@@ -188,7 +188,7 @@ class App:
                 now = datetime.now()
                 # Formata a data e hora como string
                 data = now.strftime("%Y-%m-%d")
-                User1 = "Lais"
+                User1 = cpf_value.value
                 Compras = [unidecode.unidecode(item[1]) for item in items]  # Pega todos os valores da coluna "Produto"
                 Compras1 = json.dumps(Compras)
                 Valor1 = total_text.value
@@ -253,7 +253,7 @@ class App:
                 now = datetime.now()
                 # Formata a data e hora como string
                 data = now.strftime("%Y-%m-%d %H:%M:%S")
-                User1 = "Lais"
+                User1 = cpf_value.value
                 Compras = [unidecode.unidecode(item[1]) for item in items]   # Pega todos os valores da coluna "Produto"
                 Compras1 = json.dumps(Compras)
                 Valor1 = total_text.value
@@ -301,6 +301,7 @@ class App:
             ),
             on_click=add_to_list
         )
+        self.page.update()
         # Conecta ao banco de dados e obtém o último id
         conn = sqlite3.connect('Atividade001/PDV/db/cadastrosU.db')
         cursor = conn.cursor()
@@ -315,6 +316,7 @@ class App:
         # Incrementa o id
         id1 = id + 1
         id1 = str(id1).zfill(12)
+        self.page.update()
         # Obtém a data e hora atuais
         now = datetime.now()
         # Formata a data e hora como string
@@ -330,7 +332,35 @@ class App:
         hora_value = ft.Text(value=hora, size=19, color="black")
 
         cpf_label = ft.Text(value="CPF: ", size=20, font_family="Times New Roman", color="black")
-        cpf_value = ft.TextField(color="black", width=157, height=40, text_size=20)
+
+        def format_cpf(e):
+            # Remove non-digit characters and limit to 11 characters
+            raw_cpf = ''.join(filter(str.isdigit, cpf_value.value))[:11]
+
+            # Format the CPF
+            formatted_cpf = raw_cpf
+            if len(raw_cpf) > 9:
+                formatted_cpf = f"{raw_cpf[:3]}.{raw_cpf[3:6]}.{raw_cpf[6:9]}-{raw_cpf[9:11]}"
+            elif len(raw_cpf) > 6:
+                formatted_cpf = f"{raw_cpf[:3]}.{raw_cpf[3:6]}.{raw_cpf[6:]}"
+            elif len(raw_cpf) > 3:
+                formatted_cpf = f"{raw_cpf[:3]}.{raw_cpf[3:]}"
+            cpf_value.value = formatted_cpf
+            self.page.update()
+
+        cpf_value = ft.TextField(
+            hint_text="Digite seu CPF...",
+            color="black",
+            width=200,
+            height=80,
+            text_size=23,
+            max_length=14,
+            on_change=format_cpf,
+            border_radius=0,
+            border_color="transparent",
+            filled=True, 
+            bgcolor=ft.colors.GREY_300,
+        )
 
         # Create containers for each div with proper styling and spacing
         div1 = ft.Container(
@@ -349,14 +379,19 @@ class App:
             padding=ft.padding.all(20)
         )
         div4 = ft.Container(
-            content=ft.Row([cpf_label, cpf_value], spacing=10, alignment=ft.alignment.center),
-            alignment=ft.alignment.center,
-            padding=ft.padding.all(20)
-        )
+        content=ft.Row(
+            [cpf_label, cpf_value],
+            spacing=5,
+            alignment=ft.MainAxisAlignment.END,  # Align items to the right within the row
+            vertical_alignment=ft.CrossAxisAlignment.CENTER,  # Ensure vertical alignment in the center
+        ),
+        alignment=ft.alignment.center_right,
+        padding=ft.padding.all(5)
+    )
         # Create the main navigation container
         nave = ft.Container(
             content=ft.Row([div1, div2, div3, div4], spacing=20, alignment=ft.alignment.center),
-            alignment=ft.alignment.top_center,
+            alignment=ft.alignment.center,
             padding=ft.padding.all(10),
             bgcolor=ft.colors.GREY_300,
             height=120,
