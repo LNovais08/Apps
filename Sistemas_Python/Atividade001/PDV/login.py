@@ -9,6 +9,7 @@ class Login:
         self.page.title = "Login"
         self.page.bgcolor = "#f0f0f0"
         self.page.padding = 50
+        self.page.window_resizable = False
 
         # Campos de entrada
         self.email_field = TextField(label="Email", width=300, icon=icons.EMAIL, border_color=ft.colors.BLUE_GREY_300, focused_border_color=ft.colors.BLUE)
@@ -20,28 +21,35 @@ class Login:
         # Botão de login
         self.login_button = ElevatedButton(text="Entrar", on_click=self.login, width=300, height=50, bgcolor=ft.colors.BLUE, color=ft.colors.WHITE)
 
-        # Layout
-        self.page.add(
-            Container(
+        layout = Container(
                 content=Column(
                     controls=[
-                        Image(src="IMG/logo.png", width=150, height=150),
-                        Text(value="Login", size=30, weight="bold", color=ft.colors.BLACK),
+                        Row(
+                            controls=[
+                                Image(src="Atividade001/PDV/img/login.jpg", width=150, height=150)
+                            ],
+                            alignment="center"
+                        ),
                         self.email_field,
                         self.senha_field,
-                        self.show_password,
+                        Row(
+                            controls=[self.show_password],
+                            alignment="center"
+                        ),
                         self.login_button,
                         Row(
                             controls=[
                                 Text("Não tem uma conta?", color=ft.colors.BLACK),
                                 ft.TextButton("Inscreva-se!", on_click=lambda e: self.page.go("/register"))
                             ],
-                            alignment="center"
+                            alignment="center",
+                            vertical_alignment="center"
                         )
                     ],
                     alignment="center",
-                    horizontal_alignment="center",
-                    spacing=10
+                    horizontal_alignment="center", 
+                    spacing=10,
+                    height=500,
                 ),
                 alignment=alignment.center,
                 padding=padding.all(50),
@@ -49,7 +57,8 @@ class Login:
                 bgcolor=ft.colors.WHITE,
                 shadow=BoxShadow(blur_radius=20, spread_radius=5, color=ft.colors.BLUE_GREY_300)
             )
-        )
+        # Layout
+        self.page.add(layout)
 
     # Alternar exibição da senha
     def toggle_password(self, e):
@@ -64,7 +73,7 @@ class Login:
         conn = sqlite3.connect('Atividade001/PDV/db/cadastrosU.db')  # Substitua pelo caminho do seu banco de dados
         cursor = conn.cursor()
         
-        cursor.execute("SELECT * FROM cadastros_Usuarios WHERE email=? AND password=?", (email, senha))
+        cursor.execute("SELECT * FROM cadastros_Usuarios WHERE email=? AND senha=?", (email, senha))
         user = cursor.fetchone()
 
         if user:
