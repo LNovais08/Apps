@@ -4,7 +4,6 @@ import sqlite3
 from datetime import datetime
 import json
 import unidecode
-import matplotlib
 import matplotlib.pyplot as plt
 from flet.matplotlib_chart import MatplotlibChart
 
@@ -52,6 +51,7 @@ class App:
         # Mostra a página inicial ao iniciar o aplicativo
         self.show_home(None)
 
+    #MOSTRAR AS PAGINAS DE FORMA CORRETA
     def show_pdv(self, e):
         self.hide_background_image()
         if self.current_page:
@@ -102,6 +102,7 @@ class App:
             self.page.controls.remove(self.background_image)
             self.page.update()
     
+    #CRIANDO A PAGINA PDV
     def create_pdv_page(self):
         # Exemplo de criação da página PDV
         items = []
@@ -206,6 +207,8 @@ class App:
                 txt_valor.value = ""
                 total_text.value = ""
                 items.clear()
+                n_nota_label.value = ids()
+                cpf_value.value = ""
                 self.page.update()
 
             modal = ft.AlertDialog(
@@ -272,6 +275,8 @@ class App:
                 total_text.value = ""
                 items.clear()
                 update_table()
+                n_nota_label.value = ids()
+                cpf_value.value = ""
                 self.page.update()
 
             modal = ft.AlertDialog(
@@ -301,22 +306,22 @@ class App:
             ),
             on_click=add_to_list
         )
-        self.page.update()
-        # Conecta ao banco de dados e obtém o último id
-        conn = sqlite3.connect('Atividade001/PDV/db/cadastrosU.db')
-        cursor = conn.cursor()
-        cursor.execute("SELECT MAX(id) FROM Vendas")
-        result = cursor.fetchone()
-        conn.close()
-        # Se result for None, significa que não há registros na tabela. Então, definimos id como 0.
-        if result[0] is None:
-            id = 0
-        else:
-            id = int(result[0])  # Certifique-se de que id seja um inteiro
-        # Incrementa o id
-        id1 = id + 1
-        id1 = str(id1).zfill(12)
-        self.page.update()
+        def ids():
+            # Conecta ao banco de dados e obtém o último id
+            conn = sqlite3.connect('Atividade001/PDV/db/cadastrosU.db')
+            cursor = conn.cursor()
+            cursor.execute("SELECT MAX(id) FROM Vendas")
+            result = cursor.fetchone()
+            conn.close()
+            # Se result for None, significa que não há registros na tabela. Então, definimos id como 0.
+            if result[0] is None:
+                id = 0
+            else:
+                id = int(result[0])  # Certifique-se de que id seja um inteiro
+            # Incrementa o id
+            id1 = id + 1
+            id1 = str(id1).zfill(12)
+            return id1
         # Obtém a data e hora atuais
         now = datetime.now()
         # Formata a data e hora como string
@@ -324,7 +329,7 @@ class App:
         hora = now.strftime("%H:%M:%S")
         # Define the contents of the labels
         n_nota = ft.Text(value="N° da Nota", size=25, font_family="Times New Roman", color="black")
-        n_nota_label = ft.Text(value=str(id1), size=18, color="black")
+        n_nota_label = ft.Text(value=ids(), size=18, color="black")
 
         data_label = ft.Text(value="Data: ", size=20, font_family="Times New Roman", color="black")
         data_value = ft.Text(value=data, size=18, color="black")
@@ -468,8 +473,8 @@ class App:
         )
         return principal
 
+    #CRIANDO CADASTRO DE USUARIOS
     def create_cadastro_usuario_page(self):
-        # Exemplo de criação da página de Cadastro de Usuário
 
         def link_clicked(e):
             nome1 = Nome.value
@@ -591,6 +596,7 @@ class App:
             bgcolor=ft.colors.BLUE_GREY_50,
         )
 
+    #CRIANDO CADASTRO DE PRODUTOS
     def create_cadastro_produto_page(self):
         # Exemplo de criação da página de Cadastro de Produto
         return ft.Container(
@@ -599,6 +605,7 @@ class App:
             expand=True
         )
 
+    #CRIANDO CADASTRO DE VENDAS
     def create_vendas_page(self):
         conn = sqlite3.connect('Atividade001/PDV/db/cadastrosU.db')
         cursor = conn.cursor()
