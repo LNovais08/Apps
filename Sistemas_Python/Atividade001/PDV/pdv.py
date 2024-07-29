@@ -13,6 +13,8 @@ class App:
     def  __init__(self, page: Page):
         self.page = page
         self.page.title = "SuperMarket"
+        # Centralizar a janela na tela
+        self.page.window_center()
         self.page.window_resizable = False
         self.page.padding = 40
         self.page.bgcolor = "WHITE"

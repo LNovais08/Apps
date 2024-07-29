@@ -2,11 +2,14 @@ from flet import *
 import flet as ft
 import sqlite3
 import subprocess
+import sys
 
 def main(page: Page):
     # Definindo o título da página
     page.title = "Página Login"
-
+    # Centralizar a janela na tela
+    page.window_center()
+    
     # Criando o contêiner principal
     principal = ft.Container(
         bgcolor=ft.colors.WHITE,
@@ -182,6 +185,8 @@ def main(page: Page):
             result = cursor.fetchone()
             conn.close()
             if result:
+                # Fecha a tela atual
+                page.window_close()
                 # Executa outro script Python
                 script_path = "c:\\Users\\Lais\\OneDrive\\Documentos\\GitHub\\CursoSENAC\\Apps\\Sistemas_Python\\Atividade001\\PDV\\pdv.py"
                 subprocess.call(["python", script_path])
