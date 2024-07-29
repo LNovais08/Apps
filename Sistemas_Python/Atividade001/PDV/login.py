@@ -1,103 +1,199 @@
 from flet import *
 import flet as ft
 import sqlite3
+import subprocess
 
-class Login:
+def main(page: Page):
+    # Definindo o título da página
+    page.title = "Página Login"
 
-    def __init__(self, page: Page):
-        self.page = page
-        self.page.title = "Login"
-        self.page.bgcolor = "#f0f0f0"
-        self.page.padding = 50
-        self.page.window_resizable = False
+    # Criando o contêiner principal
+    principal = ft.Container(
+        bgcolor=ft.colors.WHITE,
+        alignment=ft.alignment.center,
+        expand=True
+    )
 
-        # Campos de entrada
-        self.email_field = TextField(label="Email", width=300, icon=icons.EMAIL, border_color=ft.colors.BLUE_GREY_300, focused_border_color=ft.colors.BLUE)
-        self.senha_field = TextField(label="Senha", width=300, password=True, icon=icons.LOCK, border_color=ft.colors.BLUE_GREY_300, focused_border_color=ft.colors.BLUE)
+    # Criando o contêiner tela com imagem de fundo
+    img_container = ft.Container(
+        content=ft.Image(
+            src='PDV/img/login2.jpg',
+            width=page.window_width,
+            height=page.window_height,
+            fit=ft.ImageFit.COVER,
+        ),
+        expand=True,
+    )
 
-        # Checkbox para mostrar/ocultar senha
-        self.show_password = Checkbox(label="Ver senha", value=False, on_change=self.toggle_password)
-
-        # Botão de login
-        self.login_button = ElevatedButton(text="Entrar", on_click=self.login, width=300, height=50, bgcolor=ft.colors.BLUE, color=ft.colors.WHITE)
-
-        layout = Container(
-                content=Column(
-                    controls=[
-                        Row(
-                            controls=[
-                                Image(src="Atividade001/PDV/img/login.jpg", width=150, height=150)
-                            ],
-                            alignment="center"
-                        ),
-                        self.email_field,
-                        self.senha_field,
-                        Row(
-                            controls=[self.show_password],
-                            alignment="center"
-                        ),
-                        self.login_button,
-                        Row(
-                            controls=[
-                                Text("Não tem uma conta?", color=ft.colors.BLACK),
-                                ft.TextButton("Inscreva-se!", on_click=lambda e: self.page.go("/register"))
-                            ],
-                            alignment="center",
-                            vertical_alignment="center"
-                        )
-                    ],
-                    alignment="center",
-                    horizontal_alignment="center", 
-                    spacing=10,
-                    height=500,
-                ),
-                alignment=alignment.center,
-                padding=padding.all(50),
-                border_radius=10,
-                bgcolor=ft.colors.WHITE,
-                shadow=BoxShadow(blur_radius=20, spread_radius=5, color=ft.colors.BLUE_GREY_300)
-            )
-        # Layout
-        self.page.add(layout)
-
-    # Alternar exibição da senha
-    def toggle_password(self, e):
-        self.senha_field.password = not self.show_password.value
-        self.page.update()
-
-    # Função de login
-    def login(self, e):
-        email = self.email_field.value
-        senha = self.senha_field.value
-
-        conn = sqlite3.connect('Atividade001/PDV/db/cadastrosU.db')  # Substitua pelo caminho do seu banco de dados
+    # Função para conectar ao banco de dados e criar a tabela se não existir
+    def init_db():
+        conn = sqlite3.connect('PDV/db/cadastrosU.db')
         cursor = conn.cursor()
-        
-        cursor.execute("SELECT * FROM cadastros_Usuarios WHERE email=? AND senha=?", (email, senha))
-        user = cursor.fetchone()
-
-        if user:
-            self.show_alert("Login efetuado com sucesso!", "Bem-vindo!", "success")
-        else:
-            self.show_alert("Hmm, algo deu errado.", "Seu login NÃO foi encontrado. E-mail ou Senha incorretos! Não possui uma conta? Crie uma!", "error")
-
+        cursor.execute('''CREATE TABLE IF NOT EXISTS cadastros_Usuarios
+                          (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, Tel TEXT ,email TEXT, sexo TEXT , grau TEXT,senha TEXT)''')
+        conn.commit()
         conn.close()
 
-    # Função para exibir alerta
-    def show_alert(self, title, text, icon):
-        self.page.dialog = ft.AlertDialog(
-            title=ft.Text(title),
-            content=ft.Text(text),
-            actions=[
-                ft.TextButton("OK", on_click=lambda e: self.close_alert())
-            ],
-            actions_alignment=ft.MainAxisAlignment.END
+    # Inicializa o banco de dados
+    init_db()
+    
+    def show_login_page():
+        page.clean()
+        # Itens para Login
+        nonlocal email_login, senha_login
+        text_login = ft.Text("Login", color="Black", size=35)
+        email_login = ft.TextField(label="E-mail", width=450, color="black", text_size=15)
+        senha_login = ft.TextField(label="Senha", width=450, color="black", password=True, can_reveal_password=True, text_size=15)
+        logar = ft.ElevatedButton(text="Logar", width=150, height=35, color="white", on_click=entrar)
+        link = ft.TextButton("Clique aqui para se Cadastrar", on_click=link_clicked)
+
+        # Criando o contêiner de login
+        login = ft.Container(
+            content=ft.Column(
+                controls=[text_login, email_login, senha_login, logar, link],
+                alignment=ft.MainAxisAlignment.CENTER,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                spacing=20
+            ),
+            bgcolor=ft.colors.WHITE,
+            width=595,
+            height=670,
+            alignment=ft.alignment.center
         )
-        self.page.dialog.open = True
-        self.page.update()
+        principal.content = ft.Row(
+            controls=[img_container, login],
+            alignment=ft.MainAxisAlignment.CENTER,  # Centralizando os contêineres na tela
+            expand=True
+        )
+        page.add(principal)
+        page.update()
 
-    def close_alert(self):
-        self.page.dialog.open = False
-        self.page.update()
+    def link_clicked(e):
+        def cadastrar(e):
+            nome1 = Nome.value
+            tel1 = Tel.value
+            email1 = Email.value
+            sexo1 = sexo.value
+            senha1 = senha.value
+            adm1 = adm.value
+            if not email1:
+                Email.error_text = "Preencha seu E-mail"
+                page.update()
+            elif not senha1:
+                senha.error_text = "Preencha sua Senha"
+                page.update()
+            elif not nome1:
+                Nome.error_text = "Preencha seu Nome"
+                page.update()
+            elif not sexo1:
+                sexo.error_text = "Preencha qual o seu Sexo"
+                page.update()
+            elif not tel1:
+                Tel.error_text = "Preencha seu Telefone"
+                page.update()
+            else:
+                # Conecta ao banco de dados e insere os valores
+                conn = sqlite3.connect('PDV/db/cadastrosU.db')
+                cursor = conn.cursor()
+                cursor.execute("INSERT INTO cadastros_Usuarios (nome, Tel, email, sexo, grau, senha) VALUES (?, ?, ?, ?, ?, ?)", (nome1, tel1, email1, sexo1, adm1, senha1))
+                conn.commit()
+                conn.close()
+                Nome.value = ""
+                Tel.value = ""
+                Email.value = ""
+                sexo.value = ""
+                adm.value = ""
+                senha.value = ""
+                page.update()
+                       
+        # Função para formatar e validar o telefone
+        def format_telefone(e):
+            raw_tel = ''.join(filter(str.isdigit, Tel.value))[:11]  # Somente dígitos e max 11 caracteres
+            formatted_tel = raw_tel
+            if len(raw_tel) > 10:
+                formatted_tel = f"({raw_tel[:2]}) {raw_tel[2:7]}-{raw_tel[7:11]}"
+            elif len(raw_tel) > 6:
+                formatted_tel = f"({raw_tel[:2]}) {raw_tel[2:6]}-{raw_tel[6:]}"
+            elif len(raw_tel) > 2:
+                formatted_tel = f"({raw_tel[:2]}) {raw_tel[2:]}"
+            Tel.value = formatted_tel
+            page.update()
 
-ft.app(target=Login)
+        def dropdown_changed(e):
+            adm.value = adm.value
+            page.update()
+        
+        # Itens para Cadastro de Usuário
+        Nome = ft.TextField(label="Nome", width=450, color="black", text_size=15, border_color="gray")
+        Tel = ft.TextField(label="Telefone", width=450, color="black", text_size=15, border_color="gray", on_change=format_telefone)
+        Email = ft.TextField(label="E-mail", width=450, color="black", border_color="gray")
+        sexo = ft.RadioGroup(
+            content=ft.Row([
+                ft.Radio(value="Feminino", label="Feminino"),
+                ft.Radio(value="Masculino", label="Masculino")
+            ], alignment=ft.MainAxisAlignment.CENTER),
+        ) 
+        adm = ft.Dropdown(
+            width=450,
+            on_change=dropdown_changed,
+            options=[
+                ft.dropdown.Option("Admin"),
+                ft.dropdown.Option("Funcionário"),
+            ],
+        ) 
+        senha = ft.TextField(label="Senha", width=450, color="black", password=True, can_reveal_password=True, text_size=15, border_color="gray")
+        cadastrar_btn = ft.ElevatedButton(text="Cadastrar", width=150, height=35, color="white", on_click=cadastrar)
+
+        cadastro = ft.Container(
+            content=ft.Column(
+                controls=[Nome, Tel, Email, sexo, adm, senha, cadastrar_btn],
+                alignment=ft.MainAxisAlignment.CENTER,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                spacing=20
+            ),
+            bgcolor=ft.colors.WHITE,
+            width=595,
+            height=670,
+            alignment=ft.alignment.center
+        )
+                
+        principal.content = ft.Row(
+            controls=[img_container, cadastro],
+            alignment=ft.MainAxisAlignment.CENTER,  # Centralizando os contêineres na tela
+            expand=True
+        )
+        page.add(principal)
+        page.update()
+        
+    def entrar(e):
+        email1 = email_login.value
+        senha1 = senha_login.value
+        if not email1:
+            email_login.error_text = "Preencha seu E-mail"
+            page.update()
+        elif not senha1:
+            senha_login.error_text = "Preencha sua Senha"
+            page.update()
+        else:
+            # Conecta ao banco de dados e insere os valores
+            conn = sqlite3.connect('PDV/db/cadastrosU.db')
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM cadastros_Usuarios WHERE email=? AND senha=?", (email1, senha1))
+            result = cursor.fetchone()
+            conn.close()
+            if result:
+                # Executa outro script Python
+                script_path = "c:\\Users\\Lais\\OneDrive\\Documentos\\GitHub\\CursoSENAC\\Apps\\Sistemas_Python\\Atividade001\\PDV\\pdv.py"
+                subprocess.call(["python", script_path])
+            else:
+                email_login.error_text = "E-mail ou senha incorretos"
+                senha_login.value = ""
+                page.update()
+
+    # Inicializa as variáveis de controle como None
+    email_login = None
+    senha_login = None
+
+    show_login_page()
+
+ft.app(target=main)

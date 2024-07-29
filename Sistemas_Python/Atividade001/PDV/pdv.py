@@ -18,7 +18,7 @@ class App:
         self.page.bgcolor = "WHITE"
         self.background_image = ft.Container(
             content=ft.Image(
-                src="Atividade001/PDV/img/principal.jpg",  # Substitua pela URL da sua imagem de fundo
+                src="PDV/img/principal.jpg",  # Substitua pela URL da sua imagem de fundo
                 fit=ft.ImageFit.COVER,
                 expand=True,
             ),
@@ -196,7 +196,7 @@ class App:
                 Data1 = data
                 Estado1 = "Pago"
                 # Conecta ao banco de dados e insere os valores
-                conn = sqlite3.connect('Atividade001/PDV/db/cadastrosU.db')
+                conn = sqlite3.connect('PDV/db/cadastrosU.db')
                 cursor = conn.cursor()
                 cursor.execute("INSERT INTO Vendas (User, Compras, Valor_Total, Data, Estado) VALUES (?, ?, ?, ?, ?)", (User1, Compras1, Valor1, Data1, Estado1))
                 conn.commit()
@@ -263,7 +263,7 @@ class App:
                 Data1 = data
                 Estado1 = "Cancelado"
                 # Conecta ao banco de dados e insere os valores
-                conn = sqlite3.connect('Atividade001/PDV/db/cadastrosU.db')
+                conn = sqlite3.connect('PDV/db/cadastrosU.db')
                 cursor = conn.cursor()
                 cursor.execute("INSERT INTO Vendas (User, Compras, Valor_Total, Data, Estado) VALUES (?, ?, ?, ?, ?)", (User1, Compras1, Valor1, Data1, Estado1))
                 conn.commit()
@@ -308,7 +308,7 @@ class App:
         )
         def ids():
             # Conecta ao banco de dados e obtém o último id
-            conn = sqlite3.connect('Atividade001/PDV/db/cadastrosU.db')
+            conn = sqlite3.connect('PDV/db/cadastrosU.db')
             cursor = conn.cursor()
             cursor.execute("SELECT MAX(id) FROM Vendas")
             result = cursor.fetchone()
@@ -500,7 +500,7 @@ class App:
                 self.page.update()
             else:
                 # Conecta ao banco de dados e insere os valores
-                conn = sqlite3.connect('Atividade001/PDV/db/cadastrosU.db')
+                conn = sqlite3.connect('PDV/db/cadastrosU.db')
                 cursor = conn.cursor()
                 cursor.execute("INSERT INTO cadastros_Usuarios (nome, Tel, email, sexo, grau, senha) VALUES (?, ?, ?, ?, ?, ?)", (nome1, tel1, email1, sexo1, adm1, senha1))
                 conn.commit()
@@ -607,7 +607,7 @@ class App:
 
     #CRIANDO CADASTRO DE VENDAS
     def create_vendas_page(self):
-        conn = sqlite3.connect('Atividade001/PDV/db/cadastrosU.db')
+        conn = sqlite3.connect('PDV/db/cadastrosU.db')
         cursor = conn.cursor()
         cursor.execute("SELECT Valor_Total, Data FROM Vendas")
         vendas_data = cursor.fetchall()
