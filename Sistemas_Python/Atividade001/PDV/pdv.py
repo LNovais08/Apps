@@ -30,6 +30,22 @@ class App:
         )
         self.current_page = None  # Armazenará a página atualmente visível
 
+        # Ler as informações do usuário do arquivo temporário
+        with open("temp_user_info.json", "r") as temp_file:
+            user_info = json.load(temp_file)
+
+        # Barra de aplicativos com menu
+        menu_items = [
+            ft.PopupMenuItem(text="PDV", icon="MONETIZATION_ON", on_click=self.show_pdv),
+            ft.PopupMenuItem(text="Home", icon="HOME", on_click=self.show_home)
+        ]
+
+        if user_info['grau'] == "Admin":
+            menu_items.extend([
+                ft.PopupMenuItem(text="Cadastro Usuário", icon="APP_REGISTRATION", on_click=self.show_cadastro_usuario),
+                ft.PopupMenuItem(text="Cadastro Produto", icon="APP_REGISTRATION", on_click=self.show_cadastro_produto),
+                ft.PopupMenuItem(text="Vendas", icon="SELL", on_click=self.show_vendas)
+            ])
         # Barra de aplicativos com menu
         self.page.appbar = ft.AppBar(
             leading=ft.Icon(ft.icons.STORAGE),
@@ -39,13 +55,7 @@ class App:
             bgcolor=ft.colors.SURFACE_VARIANT,
             actions=[
                 ft.PopupMenuButton(
-                    items=[
-                        ft.PopupMenuItem(text="PDV", icon="MONETIZATION_ON", on_click=self.show_pdv),
-                        ft.PopupMenuItem(text="Cadastro Usuário", icon="APP_REGISTRATION", on_click=self.show_cadastro_usuario),
-                        ft.PopupMenuItem(text="Cadastro Produto", icon="APP_REGISTRATION", on_click=self.show_cadastro_produto),
-                        ft.PopupMenuItem(text="Vendas", icon="SELL", on_click=self.show_vendas),
-                        ft.PopupMenuItem(text="Home", icon="HOME", on_click=self.show_home)
-                    ]
+                    items=menu_items
                 ),
             ],
         )

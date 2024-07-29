@@ -2,7 +2,7 @@ from flet import *
 import flet as ft
 import sqlite3
 import subprocess
-import sys
+import json
 
 def main(page: Page):
     # Definindo o título da página
@@ -87,6 +87,23 @@ def main(page: Page):
             result = cursor.fetchone()
             conn.close()
             if result:
+                # Conecta ao banco de dados e verifica os valores
+                conn = sqlite3.connect('PDV/db/cadastrosU.db')
+                cursor = conn.cursor()
+                cursor.execute("SELECT * FROM cadastros_Usuarios WHERE email=? AND senha=?", (email1, senha1))
+                result = cursor.fetchone()
+                conn.close()
+                if result:
+                    # Armazena as informações do usuário em um arquivo temporário
+                    user_info = {
+                        'id': result[0],
+                        'nome': result[1],
+                        'email': result[3],
+                        'sexo': result[4],
+                        'grau': result[5]
+                    }
+                    with open("temp_user_info.json", "w") as temp_file:
+                        json.dump(user_info, temp_file)
                 # Fecha a tela atual
                 page.window_close()
                 # Executa outro script Python
