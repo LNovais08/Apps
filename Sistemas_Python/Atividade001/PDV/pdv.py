@@ -201,7 +201,8 @@ class App:
                 now = datetime.now()
                 # Formata a data e hora como string
                 data = now.strftime("%Y-%m-%d")
-                User1 = cpf_value.value
+                User1 = caixa_value.value
+                Cliente1 = cpf_value.value
                 Compras = [unidecode.unidecode(item[1]) for item in items]  # Pega todos os valores da coluna "Produto"
                 Compras1 = json.dumps(Compras)
                 Valor1 = total_text.value
@@ -210,7 +211,7 @@ class App:
                 # Conecta ao banco de dados e insere os valores
                 conn = sqlite3.connect('PDV/db/cadastrosU.db')
                 cursor = conn.cursor()
-                cursor.execute("INSERT INTO Vendas (User, Compras, Valor_Total, Data, Estado) VALUES (?, ?, ?, ?, ?)", (User1, Compras1, Valor1, Data1, Estado1))
+                cursor.execute("INSERT INTO Vendas (User, Cliente, Compras, Valor_Total, Data, Estado) VALUES (?, ?, ?, ?, ?, ?)", (User1, Cliente1,Compras1, Valor1, Data1, Estado1))
                 conn.commit()
                 conn.close()
                 Codigo.value = ""
@@ -219,6 +220,7 @@ class App:
                 txt_valor.value = ""
                 total_text.value = ""
                 items.clear()
+                update_table()
                 n_nota_label.value = ids()
                 cpf_value.value = ""
                 self.page.update()
@@ -268,7 +270,8 @@ class App:
                 now = datetime.now()
                 # Formata a data e hora como string
                 data = now.strftime("%Y-%m-%d %H:%M:%S")
-                User1 = cpf_value.value
+                User1 = caixa_value.value
+                Cliente1 = cpf_value.value
                 Compras = [unidecode.unidecode(item[1]) for item in items]   # Pega todos os valores da coluna "Produto"
                 Compras1 = json.dumps(Compras)
                 Valor1 = total_text.value
@@ -277,7 +280,7 @@ class App:
                 # Conecta ao banco de dados e insere os valores
                 conn = sqlite3.connect('PDV/db/cadastrosU.db')
                 cursor = conn.cursor()
-                cursor.execute("INSERT INTO Vendas (User, Compras, Valor_Total, Data, Estado) VALUES (?, ?, ?, ?, ?)", (User1, Compras1, Valor1, Data1, Estado1))
+                cursor.execute("INSERT INTO Vendas (User, Cliente, Compras, Valor_Total, Data, Estado) VALUES (?, ?, ?, ?, ?, ?)", (User1, Cliente1,Compras1, Valor1, Data1, Estado1))
                 conn.commit()
                 conn.close()
                 Codigo.value = ""
@@ -379,6 +382,11 @@ class App:
             bgcolor=ft.colors.GREY_300,
         )
 
+        with open("temp_user_info.json", "r") as temp_file:
+            user_info = json.load(temp_file)
+        
+        caixa_label = ft.Text(value="Caixa: ", size=20, font_family="Times New Roman", color="black")
+        caixa_value = ft.Text(value=user_info['id'], size=19, color="black")
         # Create containers for each div with proper styling and spacing
         div1 = ft.Container(
             content=ft.Column([n_nota, n_nota_label]),
@@ -404,10 +412,15 @@ class App:
         ),
         alignment=ft.alignment.center_right,
         padding=ft.padding.all(5)
-    )
+        )
+        div5 = ft.Container(
+            content=ft.Column([caixa_label, caixa_value], spacing=10, alignment=ft.alignment.center),
+            alignment=ft.alignment.center,
+            padding=ft.padding.all(20)
+        )
         # Create the main navigation container
         nave = ft.Container(
-            content=ft.Row([div1, div2, div3, div4], spacing=20, alignment=ft.alignment.center),
+            content=ft.Row([div1, div2, div3, div4, div5], spacing=20, alignment=ft.alignment.center),
             alignment=ft.alignment.center,
             padding=ft.padding.all(10),
             bgcolor=ft.colors.GREY_300,
