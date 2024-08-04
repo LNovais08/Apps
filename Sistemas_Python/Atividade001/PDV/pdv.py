@@ -387,6 +387,9 @@ class App:
         
         caixa_label = ft.Text(value="Caixa: ", size=20, font_family="Times New Roman", color="black")
         caixa_value = ft.Text(value=user_info['id'], size=19, color="black")
+
+        estado_label = ft.Text(value="Estado: ", size=20, font_family="Times New Roman", color="black")
+        estado_value = ft.Text(value=user_info['grau'], size=19, color="black")
         # Create containers for each div with proper styling and spacing
         div1 = ft.Container(
             content=ft.Column([n_nota, n_nota_label]),
@@ -418,9 +421,14 @@ class App:
             alignment=ft.alignment.center,
             padding=ft.padding.all(20)
         )
+        div6 = ft.Container(
+            content=ft.Column([estado_label, estado_value], spacing=10, alignment=ft.alignment.center),
+            alignment=ft.alignment.center,
+            padding=ft.padding.all(20)
+        )
         # Create the main navigation container
         nave = ft.Container(
-            content=ft.Row([div1, div2, div3, div4, div5], spacing=20, alignment=ft.alignment.center),
+            content=ft.Row([div1, div2, div3, div4, div5, div6], spacing=20, alignment=ft.alignment.center),
             alignment=ft.alignment.center,
             padding=ft.padding.all(10),
             bgcolor=ft.colors.GREY_300,
