@@ -642,18 +642,28 @@ class App:
     def create_vendas_page(self):
         conn = sqlite3.connect('PDV/db/cadastrosU.db')
         cursor = conn.cursor()
-        cursor.execute("SELECT Valor_Total, Data FROM Vendas")
+        cursor.execute("SELECT Valor_Total, Data, Estado FROM Vendas")
         vendas_data = cursor.fetchall()
         conn.close()
+        
+        datas = []
+        valores = []
+        valor_acumulado = 0
 
-        valores = [row[0] for row in vendas_data]
-        datas = [row[1] for row in vendas_data]
-
+        for row in vendas_data:
+            valor_total, data, estado = row
+            if estado == "Pago":
+                valor_acumulado += valor_total
+            else:
+                valor_acumulado -= valor_total
+            datas.append(data)
+            valores.append(valor_acumulado)
+        
         fig, ax = plt.subplots()
         ax.plot(datas, valores)
         ax.set_title('Vendas')
         ax.set_xlabel('Data')
-        ax.set_ylabel('Valor Total')
+        ax.set_ylabel('Valor Total Acumulado')
 
         chart = MatplotlibChart(fig, expand=True)
 
