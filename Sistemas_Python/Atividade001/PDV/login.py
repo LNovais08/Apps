@@ -107,7 +107,7 @@ def main(page: Page):
                 # Fecha a tela atual
                 page.window_close()
                 # Executa outro script Python
-                script_path = "c:\\Users\\Lais\\OneDrive\\Documentos\\GitHub\\CursoSENAC\\Apps\\Sistemas_Python\\Atividade001\\PDV\\pdv.py"
+                script_path = "./PDV/pdv.py"
                 subprocess.call(["python", script_path])
             else:
                 email_login.error_text = "E-mail ou senha incorretos"

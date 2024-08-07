@@ -642,31 +642,41 @@ class App:
     def create_vendas_page(self):
         conn = sqlite3.connect('PDV/db/cadastrosU.db')
         cursor = conn.cursor()
+        
+        # Executar a consulta
         cursor.execute("SELECT Valor_Total, Data, Estado FROM Vendas")
         vendas_data = cursor.fetchall()
         conn.close()
         
+        # Inicializar listas e variável acumulada
         datas = []
         valores = []
         valor_acumulado = 0
 
+        # Processar cada linha dos dados de vendas
         for row in vendas_data:
             valor_total, data, estado = row
+            # Atualizar valor acumulado com base no estado
             if estado == "Pago":
                 valor_acumulado += valor_total
             else:
                 valor_acumulado -= valor_total
+            
+            # Adicionar data e valor acumulado às listas
             datas.append(data)
             valores.append(valor_acumulado)
         
+        # Criar o gráfico usando Matplotlib
         fig, ax = plt.subplots()
         ax.plot(datas, valores)
         ax.set_title('Vendas')
         ax.set_xlabel('Data')
         ax.set_ylabel('Valor Total Acumulado')
 
+        # Converter o gráfico Matplotlib para um objeto MatplotlibChart do Flet
         chart = MatplotlibChart(fig, expand=True)
 
+        # Retornar o container Flet contendo o gráfico
         return ft.Container(
             content=chart,
             alignment=ft.alignment.center,
