@@ -6,7 +6,7 @@ import json
 import unidecode
 import matplotlib.pyplot as plt
 from flet.matplotlib_chart import MatplotlibChart
-
+import re
 
 class App:
 
@@ -510,26 +510,26 @@ class App:
     def create_cadastro_usuario_page(self):
 
         def link_clicked(e):
-            nome1 = Nome.value
-            tel1 = Tel.value
-            email1 = Email.value
+            nome1 = nome.value
+            tel1 = tel.value
+            email1 = email.value
             sexo1 = sexo.value
             senha1 = senha.value
             adm1 = adm.value
             if not email1:
-                Email.error_text = "Preencha seu E-mail"
+                email.error_text = "Preencha seu E-mail"
                 self.page.update()
             elif not senha1:
                 senha.error_text = "Preencha sua Senha"
                 self.page.update()
             elif not nome1:
-                Nome.error_text = "Preencha seu Nome"
+                nome.error_text = "Preencha seu Nome"
                 self.page.update()
             elif not sexo1:
                 sexo.error_text = "Preencha qual o seu Sexo"
                 self.page.update()
             elif not tel1:
-                Tel.error_text = "Preencha seu Telefone"
+                tel.error_text = "Preencha seu Telefone"
                 self.page.update()
             else:
                 # Conecta ao banco de dados e insere os valores
@@ -538,9 +538,9 @@ class App:
                 cursor.execute("INSERT INTO cadastros_Usuarios (nome, Tel, email, sexo, grau, senha) VALUES (?, ?, ?, ?, ?, ?)", (nome1, tel1, email1, sexo1, adm1, senha1))
                 conn.commit()
                 conn.close()
-                Nome.value = ""
-                Tel.value = ""
-                Email.value = ""
+                nome.value = ""
+                tel.value = ""
+                email.value = ""
                 sexo.value = ""
                 adm.value = ""
                 senha.value = ""
@@ -548,7 +548,7 @@ class App:
         
         # Função para formatar e validar o telefone
         def format_telefone(e):
-            raw_tel = ''.join(filter(str.isdigit, Tel.value))[:11]  # Somente dígitos e max 11 caracteres
+            raw_tel = ''.join(filter(str.isdigit, tel.value))[:11]  # Somente dígitos e max 11 caracteres
             formatted_tel = raw_tel
             if len(raw_tel) > 10:
                 formatted_tel = f"({raw_tel[:2]}) {raw_tel[2:7]}-{raw_tel[7:11]}"
@@ -556,7 +556,7 @@ class App:
                 formatted_tel = f"({raw_tel[:2]}) {raw_tel[2:6]}-{raw_tel[6:]}"
             elif len(raw_tel) > 2:
                 formatted_tel = f"({raw_tel[:2]}) {raw_tel[2:]}"
-            Tel.value = formatted_tel
+            tel.value = formatted_tel
             self.page.update()
 
         def dropdown_changed(e):
@@ -565,15 +565,44 @@ class App:
 
         
         # Itens para Cadastro de Usuário
-        Nome = ft.TextField(label="Nome", width=450, color="black", text_size=15, border_color="gray")
-        Tel = ft.TextField(label="Telefone", width=450, color="black", text_size=15, border_color="gray", on_change=format_telefone)
-        Email = ft.TextField(label="E-mail", text_align=ft.TextAlign.CENTER, width=450, color="black", border_color="gray")
+        nome = ft.TextField(
+            label="Nome",
+            width=450,
+            color="black",
+            text_size=18,
+            border_color="gray",
+            border_radius=5,
+        )
+
+        tel = ft.TextField(
+            label="Telefone",
+            width=450,
+            color="black",
+            text_size=18,
+            border_color="gray",
+            border_radius=5,
+            on_change=format_telefone
+        )
+
+        email = ft.TextField(
+            label="E-mail",
+            text_align=ft.TextAlign.CENTER,
+            width=450,
+            color="black",
+            border_color="gray",
+            border_radius=5,
+        )
+
         sexo = ft.RadioGroup(
-            content=ft.Row([
-                ft.Radio(value="Feminino", label="Feminino"),
-                ft.Radio(value="Masculino", label="Masculino")
-            ], alignment=ft.MainAxisAlignment.CENTER),
-        ) 
+            content=ft.Row(
+                controls=[
+                    ft.Radio(value="Feminino", label="Feminino"),
+                    ft.Radio(value="Masculino", label="Masculino")
+                ],
+                alignment=ft.MainAxisAlignment.CENTER
+            ),
+        )
+
         adm = ft.Dropdown(
             width=450,
             on_change=dropdown_changed,
@@ -581,30 +610,41 @@ class App:
                 ft.dropdown.Option("Admin"),
                 ft.dropdown.Option("Funcionário"),
             ],
-        ) 
-        senha = ft.TextField(label="Senha", width=450, color="black", password=True, can_reveal_password=True, text_size=15, border_color="gray")
-        
+            border_radius=5,
+        )
+
+        senha = ft.TextField(
+            label="Senha",
+            width=450,
+            color="black",
+            password=True,
+            can_reveal_password=True,
+            text_size=18,
+            border_color="gray",
+            border_radius=5,
+        )
+
         # Botão de Cadastro
         cadastrar_button = ft.ElevatedButton(
             text="Cadastrar",
             on_click=link_clicked,
             style=ft.ButtonStyle(
-                shape={"": ft.RoundedRectangleBorder(radius=5)},
+                shape={"": ft.RoundedRectangleBorder(radius=10)},
                 color="white",
-                bgcolor="gray"
+                bgcolor="Black"
             ),
-            width=200,
-            height=50,
+            width=250,
+            height=50
         )
-    
+
         # Layout do formulário
         cadastrou = ft.Column(
-            controls=[Nome, Tel, Email, sexo, adm, senha, cadastrar_button],
+            controls=[nome, tel, email, sexo, adm, senha, cadastrar_button],
             alignment=ft.MainAxisAlignment.CENTER,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             spacing=20
         )
-        
+
         # Contêiner principal com estilos
         form_container = ft.Container(
             content=cadastrou,
@@ -619,14 +659,14 @@ class App:
                 offset=ft.Offset(5, 5),
                 spread_radius=1,
             ),
-            alignment=ft.alignment.center,
+            alignment=ft.alignment.center
         )
-
+            
         return ft.Container(
             content=form_container,
             alignment=ft.alignment.center,
             expand=True,
-            bgcolor=ft.colors.BLUE_GREY_50,
+            bgcolor=ft.colors.BLUE_GREY_200,
         )
 
     #CRIANDO CADASTRO DE PRODUTOS
@@ -656,6 +696,7 @@ class App:
         # Processar cada linha dos dados de vendas
         for row in vendas_data:
             valor_total, data, estado = row
+            valor_total = float(re.search(r'[-+]?[0-9]*\.?[0-9]+', valor_total).group())
             # Atualizar valor acumulado com base no estado
             if estado == "Pago":
                 valor_acumulado += valor_total
