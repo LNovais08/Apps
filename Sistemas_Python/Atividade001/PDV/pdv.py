@@ -568,18 +568,18 @@ class App:
         nome = ft.TextField(
             label="Nome",
             width=450,
-            color="black",
+            color="white",
             text_size=18,
-            border_color="gray",
+            border_color="white",
             border_radius=5,
         )
 
         tel = ft.TextField(
             label="Telefone",
             width=450,
-            color="black",
+            color="white",
             text_size=18,
-            border_color="gray",
+            border_color="white",
             border_radius=5,
             on_change=format_telefone
         )
@@ -588,8 +588,8 @@ class App:
             label="E-mail",
             text_align=ft.TextAlign.CENTER,
             width=450,
-            color="black",
-            border_color="gray",
+            color="white",
+            border_color="white",
             border_radius=5,
         )
 
@@ -611,16 +611,17 @@ class App:
                 ft.dropdown.Option("Funcionário"),
             ],
             border_radius=5,
+            border_color="white",
         )
 
         senha = ft.TextField(
             label="Senha",
             width=450,
-            color="black",
+            color="white",
             password=True,
             can_reveal_password=True,
             text_size=18,
-            border_color="gray",
+            border_color="white",
             border_radius=5,
         )
 
@@ -630,8 +631,8 @@ class App:
             on_click=link_clicked,
             style=ft.ButtonStyle(
                 shape={"": ft.RoundedRectangleBorder(radius=10)},
-                color="white",
-                bgcolor="Black"
+                color="black",
+                bgcolor="white"
             ),
             width=250,
             height=50
@@ -652,31 +653,193 @@ class App:
             padding=20,
             margin=20,
             border_radius=10,
-            bgcolor=ft.colors.WHITE,
-            shadow=ft.BoxShadow(
-                blur_radius=10,
-                color="black",
-                offset=ft.Offset(5, 5),
-                spread_radius=1,
-            ),
+            bgcolor="rgba(0, 0, 0, 0.5)",
             alignment=ft.alignment.center
         )
-            
-        return ft.Container(
-            content=form_container,
-            alignment=ft.alignment.center,
-            expand=True,
-            bgcolor=ft.colors.BLUE_GREY_200,
-        )
 
+
+            
+        bg = ft.Stack(
+                controls=[
+                    ft.Image(
+                        src="PDV/img/CD.jpg",  # Substitua pela URL da sua imagem de fundo
+                        fit=ft.ImageFit.COVER,
+                        expand=True,
+                        width= 20000,
+                    ),
+                    form_container  # O formulário sobrepõe a imagem de fundo
+                ],
+                alignment=ft.alignment.center,
+                expand=True
+            )
+        return bg
+    
     #CRIANDO CADASTRO DE PRODUTOS
     def create_cadastro_produto_page(self):
-        # Exemplo de criação da página de Cadastro de Produto
-        return ft.Container(
-            content=ft.Text("Cadastro Produto", size=30, color=ft.colors.BLACK),
-            alignment=ft.alignment.center,
-            expand=True
+        def link_clicked(e):
+            nome1 = nome.value
+            tel1 = tel.value
+            email1 = email.value
+            sexo1 = sexo.value
+            senha1 = senha.value
+            adm1 = adm.value
+            if not email1:
+                email.error_text = "Preencha seu E-mail"
+                self.page.update()
+            elif not senha1:
+                senha.error_text = "Preencha sua Senha"
+                self.page.update()
+            elif not nome1:
+                nome.error_text = "Preencha seu Nome"
+                self.page.update()
+            elif not sexo1:
+                sexo.error_text = "Preencha qual o seu Sexo"
+                self.page.update()
+            elif not tel1:
+                tel.error_text = "Preencha seu Telefone"
+                self.page.update()
+            else:
+                # Conecta ao banco de dados e insere os valores
+                conn = sqlite3.connect('PDV/db/cadastrosU.db')
+                cursor = conn.cursor()
+                cursor.execute("INSERT INTO cadastros_Usuarios (nome, Tel, email, sexo, grau, senha) VALUES (?, ?, ?, ?, ?, ?)", (nome1, tel1, email1, sexo1, adm1, senha1))
+                conn.commit()
+                conn.close()
+                nome.value = ""
+                tel.value = ""
+                email.value = ""
+                sexo.value = ""
+                adm.value = ""
+                senha.value = ""
+                self.page.update()
+        
+        # Função para formatar e validar o telefone
+        def format_telefone(e):
+            raw_tel = ''.join(filter(str.isdigit, tel.value))[:11]  # Somente dígitos e max 11 caracteres
+            formatted_tel = raw_tel
+            if len(raw_tel) > 10:
+                formatted_tel = f"({raw_tel[:2]}) {raw_tel[2:7]}-{raw_tel[7:11]}"
+            elif len(raw_tel) > 6:
+                formatted_tel = f"({raw_tel[:2]}) {raw_tel[2:6]}-{raw_tel[6:]}"
+            elif len(raw_tel) > 2:
+                formatted_tel = f"({raw_tel[:2]}) {raw_tel[2:]}"
+            tel.value = formatted_tel
+            self.page.update()
+
+        def dropdown_changed(e):
+            adm.value = adm.value
+            self.page.update()
+
+        
+        # Itens para Cadastro de Usuário
+        nome = ft.TextField(
+            label="Nome",
+            width=450,
+            color="white",
+            text_size=18,
+            border_color="white",
+            border_radius=5,
         )
+
+        tel = ft.TextField(
+            label="Telefone",
+            width=450,
+            color="white",
+            text_size=18,
+            border_color="white",
+            border_radius=5,
+            on_change=format_telefone
+        )
+
+        email = ft.TextField(
+            label="E-mail",
+            text_align=ft.TextAlign.CENTER,
+            width=450,
+            color="white",
+            border_color="white",
+            border_radius=5,
+        )
+
+        sexo = ft.RadioGroup(
+            content=ft.Row(
+                controls=[
+                    ft.Radio(value="Feminino", label="Feminino"),
+                    ft.Radio(value="Masculino", label="Masculino")
+                ],
+                alignment=ft.MainAxisAlignment.CENTER
+            ),
+        )
+
+        adm = ft.Dropdown(
+            width=450,
+            on_change=dropdown_changed,
+            options=[
+                ft.dropdown.Option("Admin"),
+                ft.dropdown.Option("Funcionário"),
+            ],
+            border_radius=5,
+            border_color="white",
+        )
+
+        senha = ft.TextField(
+            label="Senha",
+            width=450,
+            color="white",
+            password=True,
+            can_reveal_password=True,
+            text_size=18,
+            border_color="white",
+            border_radius=5,
+        )
+
+        # Botão de Cadastro
+        cadastrar_button = ft.ElevatedButton(
+            text="Cadastrar",
+            on_click=link_clicked,
+            style=ft.ButtonStyle(
+                shape={"": ft.RoundedRectangleBorder(radius=10)},
+                color="black",
+                bgcolor="white"
+            ),
+            width=250,
+            height=50
+        )
+
+        # Layout do formulário
+        cadastrou = ft.Column(
+            controls=[nome, tel, email, sexo, adm, senha, cadastrar_button],
+            alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            spacing=20
+        )
+
+        # Contêiner principal com estilos
+        form_container = ft.Container(
+            content=cadastrou,
+            width=500,
+            padding=20,
+            margin=20,
+            border_radius=10,
+            bgcolor="rgba(0, 0, 0, 0.5)",
+            alignment=ft.alignment.center
+        )
+
+
+            
+        bg = ft.Stack(
+                controls=[
+                    ft.Image(
+                        src="PDV/img/CD.jpg",  # Substitua pela URL da sua imagem de fundo
+                        fit=ft.ImageFit.COVER,
+                        expand=True,
+                        width= 20000,
+                    ),
+                    form_container  # O formulário sobrepõe a imagem de fundo
+                ],
+                alignment=ft.alignment.center,
+                expand=True
+            )
+        return bg
 
     #CRIANDO CADASTRO DE VENDAS
     def create_vendas_page(self):
