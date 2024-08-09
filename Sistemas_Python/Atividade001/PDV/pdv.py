@@ -681,63 +681,47 @@ class App:
     #CRIANDO CADASTRO DE PRODUTOS
     def create_cadastro_produto_page(self):
         def link_clicked(e):
-            nome1 = nome.value
-            tel1 = tel.value
-            email1 = email.value
-            sexo1 = sexo.value
-            senha1 = senha.value
-            adm1 = adm.value
-            if not email1:
-                email.error_text = "Preencha seu E-mail"
+            # Obtém a data e hora atuais
+            now = datetime.now()
+            # Formata a data e hora como string
+            data = now.strftime("%d/%m/%Y")
+            produto1 = produto.value
+            valor_unit1 = valor_unit.value
+            qtd1 = qtd.value
+            Validade1 = Validade.value
+            if not produto1:
+                produto.error_text = "Preencha o Nome do Produto"
                 self.page.update()
-            elif not senha1:
-                senha.error_text = "Preencha sua Senha"
+            elif not valor_unit1:
+                valor_unit.error_text = "Preencha o Valor Unitário"
                 self.page.update()
-            elif not nome1:
-                nome.error_text = "Preencha seu Nome"
+            elif not Validade1:
+                Validade.error_text = "Preencha a Data de Validade"
                 self.page.update()
-            elif not sexo1:
-                sexo.error_text = "Preencha qual o seu Sexo"
-                self.page.update()
-            elif not tel1:
-                tel.error_text = "Preencha seu Telefone"
+            elif not qtd1:
+                qtd.error_text = "Preencha a Quantidade"
                 self.page.update()
             else:
                 # Conecta ao banco de dados e insere os valores
                 conn = sqlite3.connect('PDV/db/cadastrosU.db')
                 cursor = conn.cursor()
-                cursor.execute("INSERT INTO cadastros_Usuarios (nome, Tel, email, sexo, grau, senha) VALUES (?, ?, ?, ?, ?, ?)", (nome1, tel1, email1, sexo1, adm1, senha1))
+                cursor.execute("INSERT INTO Estoque (Produto, Valor_Unitario, Quantidade, Data, Validade) VALUES (?, ?, ?, ?, ?)", (produto1, valor_unit1, qtd1, data, Validade1))
                 conn.commit()
                 conn.close()
-                nome.value = ""
-                tel.value = ""
-                email.value = ""
-                sexo.value = ""
-                adm.value = ""
-                senha.value = ""
+                produto.value = ""
+                valor_unit.value = ""
+                qtd.value = ""
+                Validade.value = "Nenhuma DATA selecionada"
                 self.page.update()
         
-        # Função para formatar e validar o telefone
-        def format_telefone(e):
-            raw_tel = ''.join(filter(str.isdigit, tel.value))[:11]  # Somente dígitos e max 11 caracteres
-            formatted_tel = raw_tel
-            if len(raw_tel) > 10:
-                formatted_tel = f"({raw_tel[:2]}) {raw_tel[2:7]}-{raw_tel[7:11]}"
-            elif len(raw_tel) > 6:
-                formatted_tel = f"({raw_tel[:2]}) {raw_tel[2:6]}-{raw_tel[6:]}"
-            elif len(raw_tel) > 2:
-                formatted_tel = f"({raw_tel[:2]}) {raw_tel[2:]}"
-            tel.value = formatted_tel
+        def validate_number(e):
+            # Remove caracteres não numéricos
+            e.control.value = ''.join(filter(str.isdigit, e.control.value))
             self.page.update()
 
-        def dropdown_changed(e):
-            adm.value = adm.value
-            self.page.update()
-
-        
         # Itens para Cadastro de Usuário
-        nome = ft.TextField(
-            label="Nome",
+        produto = ft.TextField(
+            label="Produto",
             width=450,
             color="black",
             text_size=18,
@@ -745,55 +729,60 @@ class App:
             border_radius=5,
         )
 
-        tel = ft.TextField(
-            label="Telefone",
-            width=450,
-            color="black",
-            text_size=18,
-            border_color="black",
-            border_radius=5,
-            on_change=format_telefone
-        )
-
-        email = ft.TextField(
-            label="E-mail",
+        valor_unit = ft.TextField(
+            label="Valor Unitário",
             text_align=ft.TextAlign.CENTER,
             width=450,
             color="black",
             border_color="black",
             border_radius=5,
+            on_change=validate_number,
         )
 
-        sexo = ft.RadioGroup(
-            content=ft.Row(
-                controls=[
-                    ft.Radio(value="Feminino", label="Feminino"),
-                    ft.Radio(value="Masculino", label="Masculino")
-                ],
-                alignment=ft.MainAxisAlignment.CENTER
-            ),
-        )
-
-        adm = ft.Dropdown(
+        qtd = ft.TextField(
+            label="Quantidade",
             width=450,
-            on_change=dropdown_changed,
-            options=[
-                ft.dropdown.Option("Admin"),
-                ft.dropdown.Option("Funcionário"),
-            ],
-            border_radius=5,
-            border_color="black",
-        )
-
-        senha = ft.TextField(
-            label="Senha",
-            width=450,
+            text_align=ft.TextAlign.CENTER,
             color="black",
-            password=True,
-            can_reveal_password=True,
             text_size=18,
             border_color="black",
             border_radius=5,
+            on_change=validate_number,
+        )
+
+        # Função para lidar com a alteração da data
+        def handle_date_change(e: ft.ControlEvent):
+            Validade.value = f"Data Selecionada: {e.control.value.strftime('%Y-%m-%d')}"
+            self.page.update()
+
+        # Configuração do DatePicker
+        cupertino_date_picker = ft.CupertinoDatePicker(
+            date_picker_mode=ft.CupertinoDatePickerMode.DATE,
+            on_change=handle_date_change,
+        )
+        
+        # Botão para abrir o DatePicker
+        ValidadeD = ft.CupertinoFilledButton(
+            "Data",
+            on_click=lambda e: self.page.open(
+                ft.CupertinoBottomSheet(
+                    cupertino_date_picker,
+                    height=216,
+                    padding=ft.padding.only(top=6),
+                )
+            ),
+            height=47,
+            width=250,
+        )
+        
+        # Label para exibir a data selecionada
+        Validade = ft.Text("Nenhuma DATA selecionada", color="Black")
+
+        # Linha com a data e o botão
+        linha = ft.Row(
+            controls=[Validade, ValidadeD],
+            alignment=ft.MainAxisAlignment.SPACE_AROUND,
+            spacing=10
         )
 
         # Botão de Cadastro
@@ -806,15 +795,15 @@ class App:
                 bgcolor="black"
             ),
             width=250,
-            height=50
+            height=50,
         )
 
         # Layout do formulário
         cadastrou = ft.Column(
-            controls=[nome, tel, email, sexo, adm, senha, cadastrar_button],
+            controls=[produto, valor_unit, qtd, linha, cadastrar_button],
             alignment=ft.MainAxisAlignment.CENTER,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-            spacing=20
+            spacing=20  # Espaçamento vertical entre os controles na coluna
         )
 
         # Contêiner principal com estilos
@@ -828,8 +817,6 @@ class App:
             alignment=ft.alignment.center
         )
 
-
-            
         bg = ft.Stack(
                 controls=[
                     ft.Image(
