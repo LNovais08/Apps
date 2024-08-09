@@ -568,19 +568,21 @@ class App:
         nome = ft.TextField(
             label="Nome",
             width=450,
-            color="white",
+            color="black",
             text_size=18,
-            border_color="white",
+            border_color="black",
             border_radius=5,
+            label_style=ft.TextStyle(color="black"),
         )
 
         tel = ft.TextField(
             label="Telefone",
             width=450,
-            color="white",
+            color="black",
             text_size=18,
-            border_color="white",
+            border_color="black",
             border_radius=5,
+            label_style=ft.TextStyle(color="black"),
             on_change=format_telefone
         )
 
@@ -588,16 +590,17 @@ class App:
             label="E-mail",
             text_align=ft.TextAlign.CENTER,
             width=450,
-            color="white",
-            border_color="white",
+            color="black",
+            border_color="black",
             border_radius=5,
+            label_style=ft.TextStyle(color="black"),
         )
 
         sexo = ft.RadioGroup(
             content=ft.Row(
                 controls=[
-                    ft.Radio(value="Feminino", label="Feminino"),
-                    ft.Radio(value="Masculino", label="Masculino")
+                    ft.Radio(value="Feminino", label="Feminino",label_style=ft.TextStyle(color="black"),),
+                    ft.Radio(value="Masculino", label="Masculino",label_style=ft.TextStyle(color="black"),)
                 ],
                 alignment=ft.MainAxisAlignment.CENTER
             ),
@@ -607,22 +610,23 @@ class App:
             width=450,
             on_change=dropdown_changed,
             options=[
-                ft.dropdown.Option("Admin"),
-                ft.dropdown.Option("Funcionário"),
+                ft.dropdown.Option("Admin", text_style=ft.TextStyle(color="black")),
+                ft.dropdown.Option("Funcionário", text_style=ft.TextStyle(color="black")),
             ],
             border_radius=5,
-            border_color="white",
+            border_color="black",
         )
 
         senha = ft.TextField(
             label="Senha",
             width=450,
-            color="white",
+            color="black",
             password=True,
             can_reveal_password=True,
             text_size=18,
-            border_color="white",
+            border_color="black",
             border_radius=5,
+            label_style=ft.TextStyle(color="black"),
         )
 
         # Botão de Cadastro
@@ -631,8 +635,8 @@ class App:
             on_click=link_clicked,
             style=ft.ButtonStyle(
                 shape={"": ft.RoundedRectangleBorder(radius=10)},
-                color="black",
-                bgcolor="white"
+                color="white",
+                bgcolor="black"
             ),
             width=250,
             height=50
@@ -735,18 +739,18 @@ class App:
         nome = ft.TextField(
             label="Nome",
             width=450,
-            color="white",
+            color="black",
             text_size=18,
-            border_color="white",
+            border_color="black",
             border_radius=5,
         )
 
         tel = ft.TextField(
             label="Telefone",
             width=450,
-            color="white",
+            color="black",
             text_size=18,
-            border_color="white",
+            border_color="black",
             border_radius=5,
             on_change=format_telefone
         )
@@ -755,8 +759,8 @@ class App:
             label="E-mail",
             text_align=ft.TextAlign.CENTER,
             width=450,
-            color="white",
-            border_color="white",
+            color="black",
+            border_color="black",
             border_radius=5,
         )
 
@@ -778,17 +782,17 @@ class App:
                 ft.dropdown.Option("Funcionário"),
             ],
             border_radius=5,
-            border_color="white",
+            border_color="black",
         )
 
         senha = ft.TextField(
             label="Senha",
             width=450,
-            color="white",
+            color="black",
             password=True,
             can_reveal_password=True,
             text_size=18,
-            border_color="white",
+            border_color="black",
             border_radius=5,
         )
 
@@ -798,8 +802,8 @@ class App:
             on_click=link_clicked,
             style=ft.ButtonStyle(
                 shape={"": ft.RoundedRectangleBorder(radius=10)},
-                color="black",
-                bgcolor="white"
+                color="white",
+                bgcolor="black"
             ),
             width=250,
             height=50
