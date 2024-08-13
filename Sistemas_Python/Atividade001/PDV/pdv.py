@@ -1,12 +1,12 @@
 from flet import *
 import flet as ft
 import sqlite3
-from datetime import datetime
 import json
 import unidecode
 import matplotlib.pyplot as plt
 from flet.matplotlib_chart import MatplotlibChart
 import re
+import datetime
 
 class App:
 
@@ -364,7 +364,7 @@ class App:
             id1 = str(id1).zfill(12)
             return id1
         # Obtém a data e hora atuais
-        now = datetime.now()
+        now = datetime.datetime.now()
         # Formata a data e hora como string
         data = now.strftime("%d/%m/%Y")
         hora = now.strftime("%H:%M")
@@ -708,10 +708,10 @@ class App:
     def create_cadastro_produto_page(self):
         def link_clicked(e):
             # Obtém a data e hora atuais
-            now = datetime.now()
+            now = datetime.datetime.now()
             # Formata a data e hora como string
             data = now.strftime("%d/%m/%Y")
-            produto1 = produto.value
+            produto1 = unidecode.unidecode(produto.value)
             valor_unit1 = valor_unit.value
             qtd1 = qtd.value
             Validade1 = Validade.value
@@ -740,10 +740,6 @@ class App:
                 Validade.value = "Nenhuma DATA selecionada"
                 self.page.update()
         
-        def validate_number(e):
-            # Remove caracteres não numéricos
-            e.control.value = ''.join(filter(str.isdigit, e.control.value))
-            self.page.update()
 
         # Itens para Cadastro de Usuário
         produto = ft.TextField(
@@ -762,7 +758,6 @@ class App:
             color="black",
             border_color="black",
             border_radius=5,
-            on_change=validate_number,
         )
 
         qtd = ft.TextField(
@@ -773,37 +768,27 @@ class App:
             text_size=18,
             border_color="black",
             border_radius=5,
-            on_change=validate_number,
         )
 
-        # Função para lidar com a alteração da data
         def handle_date_change(e: ft.ControlEvent):
             Validade.value = f"Data Selecionada: {e.control.value.strftime('%Y-%m-%d')}"
             self.page.update()
 
-        # Configuração do DatePicker
-        cupertino_date_picker = ft.CupertinoDatePicker(
-            date_picker_mode=ft.CupertinoDatePickerMode.DATE,
-            on_change=handle_date_change,
-        )
-        
+        def handle_dismissal(e):
+            Validade.value = f"Data Não selecionada"
+
         # Botão para abrir o DatePicker
-        ValidadeD = ft.CupertinoFilledButton(
+        ValidadeD = ft.ElevatedButton(
             "Data",
+            icon=ft.icons.CALENDAR_MONTH,
             on_click=lambda e: self.page.open(
-                ft.CupertinoBottomSheet(
-                    cupertino_date_picker,
-<<<<<<< HEAD
-                    height=216,
-                    padding=ft.padding.only(top=1),
-=======
-                    height=213,
-                    padding=ft.padding.only(top=3),
->>>>>>> 21fcaa71ba10328c18825e6daeb4fd1fa12ad7de
+                ft.DatePicker(
+                    first_date=datetime.datetime(year=2023, month=10, day=1),
+                    last_date=datetime.datetime(year=2024, month=10, day=1),
+                    on_change=handle_date_change,
+                    on_dismiss=handle_dismissal,
                 )
             ),
-            height=47,
-            width=250,
         )
         
         # Label para exibir a data selecionada
