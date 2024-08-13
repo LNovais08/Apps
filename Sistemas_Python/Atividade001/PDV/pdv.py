@@ -211,7 +211,33 @@ class App:
                 # Conecta ao banco de dados e insere os valores
                 conn = sqlite3.connect('PDV/db/cadastrosU.db')
                 cursor = conn.cursor()
-                cursor.execute("INSERT INTO Vendas (User, Cliente, Compras, Valor_Total, Data, Estado) VALUES (?, ?, ?, ?, ?, ?)", (User1, Cliente1,Compras1, Valor1, Data1, Estado1))
+                # Insere os dados de venda
+                cursor.execute("INSERT INTO Vendas (User, Cliente, Compras, Valor_Total, Data, Estado) VALUES (?, ?, ?, ?, ?, ?)", 
+                            (User1, Cliente1, Compras1, Valor1, Data1, Estado1))
+
+                # Atualiza a quantidade no estoque para cada item vendido
+                print(items)
+                for item in items:
+                    produto = unidecode.unidecode(item[1])
+                    qtd = item[2]
+
+                    # Primeiro, recupera a quantidade atual do estoque
+                    cursor.execute("SELECT Quantidade FROM Estoque WHERE Produto = ?", (produto,))
+                    quantidade_atual = cursor.fetchone()
+
+                    if quantidade_atual:
+                        if int(qtd):
+                            nova_quantidade = int(quantidade_atual[0]) - int(qtd)
+
+                            # Atualiza a quantidade no banco de dados
+                            sql = f"UPDATE Estoque SET Quantidade = {nova_quantidade} WHERE Produto = '{produto}'"
+                            print(sql)
+                            cursor.execute(sql)
+                        else:
+                            print(f"Quantidade vendida para o produto {produto} é inválida: '{txt_number.value}'")
+                    else:
+                        print(f"Produto {produto} não encontrado no estoque.")
+
                 conn.commit()
                 conn.close()
                 Codigo.value = ""
@@ -341,7 +367,7 @@ class App:
         now = datetime.now()
         # Formata a data e hora como string
         data = now.strftime("%d/%m/%Y")
-        hora = now.strftime("%H:%M:%S")
+        hora = now.strftime("%H:%M")
         # Define the contents of the labels
         n_nota = ft.Text(value="N° da Nota", size=25, font_family="Times New Roman", color="black")
         n_nota_label = ft.Text(value=ids(), size=18, color="black")
@@ -767,8 +793,13 @@ class App:
             on_click=lambda e: self.page.open(
                 ft.CupertinoBottomSheet(
                     cupertino_date_picker,
+<<<<<<< HEAD
                     height=216,
                     padding=ft.padding.only(top=1),
+=======
+                    height=213,
+                    padding=ft.padding.only(top=3),
+>>>>>>> 21fcaa71ba10328c18825e6daeb4fd1fa12ad7de
                 )
             ),
             height=47,
