@@ -198,7 +198,7 @@ class App:
             def close_second_modal(modal):
                 modal.open = False
                 # Obtém a data e hora atuais
-                now = datetime.now()
+                now = datetime.datetime.now()
                 # Formata a data e hora como string
                 data = now.strftime("%Y-%m-%d")
                 User1 = caixa_value.value
@@ -337,6 +337,10 @@ class App:
         txt_number = ft.TextField(label="Qtd", text_align=ft.TextAlign.CENTER, width=60, color="black")
         txt_valor = ft.TextField(label="Valor", text_align=ft.TextAlign.CENTER, width=150, color="black")
 
+        def valor(e):
+            if desconto_value.value != "00.00%":
+                txt_valor.value = txt_valor - desconto_value.value 
+
         adicionar = ft.ElevatedButton(
             text="Adicionar",
             width=120,
@@ -394,6 +398,22 @@ class App:
             cpf_value.value = formatted_cpf
             self.page.update()
 
+        def buscador(e):
+            conn = sqlite3.connect('PDV/db/cadastrosU.db')
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) FROM Vendas WHERE Cliente = ?", (cpf_value.value,))
+            result = cursor.fetchone()[0]
+            if result >= 5:
+                # Concede o desconto
+                desconto = 0.05  # 10% de desconto, por exemplo
+                desconto_value.value = f"{desconto * 100}%"
+                # Aqui você pode aplicar o desconto no valor total, no próximo produto, etc.
+            else:
+                desconto_value.value = "00.00%"
+
+            desconto_value.update()
+            conn.close()
+            
         cpf_value = ft.TextField(
             hint_text="Digite seu CPF...",
             color="black",
@@ -406,8 +426,9 @@ class App:
             border_color="transparent",
             filled=True, 
             bgcolor=ft.colors.GREY_300,
+            on_blur=buscador
         )
-
+        
         with open("temp_user_info.json", "r") as temp_file:
             user_info = json.load(temp_file)
         
@@ -416,6 +437,9 @@ class App:
 
         estado_label = ft.Text(value="Estado: ", size=20, font_family="Times New Roman", color="black")
         estado_value = ft.Text(value=user_info['grau'], size=19, color="black")
+
+        desconto_label = ft.Text(value="Desconto: ", size=20, font_family="Times New Roman", color="black")
+        desconto_value = ft.Text(value="00.00%", size=19, color="black")
         # Create containers for each div with proper styling and spacing
         div1 = ft.Container(
             content=ft.Column([n_nota, n_nota_label]),
@@ -452,9 +476,14 @@ class App:
             alignment=ft.alignment.center,
             padding=ft.padding.all(20)
         )
+        div7 = ft.Container(
+            content=ft.Column([desconto_label, desconto_value], spacing=10, alignment=ft.alignment.center),
+            alignment=ft.alignment.center,
+            padding=ft.padding.all(20)
+        )
         # Create the main navigation container
         nave = ft.Container(
-            content=ft.Row([div1, div2, div3, div4, div5, div6], spacing=20, alignment=ft.alignment.center),
+            content=ft.Row([div1, div2, div3, div4, div5, div6, div7], spacing=20, alignment=ft.alignment.center),
             alignment=ft.alignment.center,
             padding=ft.padding.all(10),
             bgcolor=ft.colors.GREY_300,
