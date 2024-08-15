@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from flet.matplotlib_chart import MatplotlibChart
 import re
 import datetime
+import math
 
 class App:
 
@@ -120,8 +121,12 @@ class App:
         items = []
 
         def update_total():
-            total = sum(float(row[2]) * float(row[3]) for row in items)
-            total_text.value = f"Total: R$ {total:.2f}"
+            if desconto_value.value != "00.00%":
+                total = sum(float(row[2]) * float(row[3]) for row in items) - float(desconto_value.value.replace("%", ''))
+                total_text.value = f"Total: R$ {total:.2f}"
+            else:
+                total = sum(float(row[2]) * float(row[3]) for row in items)
+                total_text.value = f"Total: R$ {total:.2f}"
             self.page.update()
 
         def add_to_list(e):
@@ -216,7 +221,6 @@ class App:
                             (User1, Cliente1, Compras1, Valor1, Data1, Estado1))
 
                 # Atualiza a quantidade no estoque para cada item vendido
-                print(items)
                 for item in items:
                     produto = unidecode.unidecode(item[1])
                     qtd = item[2]
@@ -337,10 +341,6 @@ class App:
         txt_number = ft.TextField(label="Qtd", text_align=ft.TextAlign.CENTER, width=60, color="black")
         txt_valor = ft.TextField(label="Valor", text_align=ft.TextAlign.CENTER, width=150, color="black")
 
-        def valor(e):
-            if desconto_value.value != "00.00%":
-                txt_valor.value = txt_valor - desconto_value.value 
-
         adicionar = ft.ElevatedButton(
             text="Adicionar",
             width=120,
@@ -407,7 +407,7 @@ class App:
                 # Concede o desconto
                 desconto = 0.05  # 10% de desconto, por exemplo
                 desconto_value.value = f"{desconto * 100}%"
-                # Aqui você pode aplicar o desconto no valor total, no próximo produto, etc.
+
             else:
                 desconto_value.value = "00.00%"
 
