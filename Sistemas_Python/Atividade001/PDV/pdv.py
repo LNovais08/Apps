@@ -3,11 +3,11 @@ import flet as ft
 import sqlite3
 import json
 import unidecode
-import matplotlib.pyplot as plt
-from flet.matplotlib_chart import MatplotlibChart
-import re
 import datetime
-import math
+import csv
+import pandas as pd
+import matplotlib.pyplot as plt
+
 
 class App:
 
@@ -210,7 +210,7 @@ class App:
                 Cliente1 = cpf_value.value
                 Compras = [unidecode.unidecode(item[1]) for item in items]  # Pega todos os valores da coluna "Produto"
                 Compras1 = json.dumps(Compras)
-                Valor1 = total_text.value
+                Valor1 = total_text.value.replace("Total: R$ ", '').strip()
                 Data1 = data
                 Estado1 = "Pago"
                 # Conecta ao banco de dados e insere os valores
@@ -879,47 +879,41 @@ class App:
 
     #CRIANDO CADASTRO DE VENDAS
     def create_vendas_page(self):
+        # Conectar ao banco de dados
         conn = sqlite3.connect('PDV/db/cadastrosU.db')
         cursor = conn.cursor()
-        
+
         # Executar a consulta
         cursor.execute("SELECT Valor_Total, Data, Estado FROM Vendas")
         vendas_data = cursor.fetchall()
         conn.close()
-        
-        # Inicializar listas e variável acumulada
-        datas = []
-        valores = []
-        valor_acumulado = 0
 
-        # Processar cada linha dos dados de vendas
-        for row in vendas_data:
-            valor_total, data, estado = row
-            valor_total = float(re.search(r'[-+]?[0-9]*\.?[0-9]+', valor_total).group())
-            # Atualizar valor acumulado com base no estado
-            if estado == "Pago":
-                valor_acumulado += valor_total
-            else:
-                valor_acumulado -= valor_total
-            
-            # Adicionar data e valor acumulado às listas
-            datas.append(data)
-            valores.append(valor_acumulado)
-        
-        # Criar o gráfico usando Matplotlib
-        fig, ax = plt.subplots()
-        ax.plot(datas, valores)
-        ax.set_title('Vendas')
-        ax.set_xlabel('Data')
-        ax.set_ylabel('Valor Total Acumulado')
+        # Salvar os dados em um arquivo CSV
+        with open('vendas_data.csv', mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(["Valor_Total", "Data", "Estado"])  # Cabeçalhos
+            writer.writerows(vendas_data)
 
-        # Converter o gráfico Matplotlib para um objeto MatplotlibChart do Flet
-        chart = MatplotlibChart(fig, expand=True)
+        # Ler os dados do CSV
+        df = pd.read_csv("vendas_data.csv", sep=",", decimal=".")
+        df["Data"] = pd.to_datetime(df["Data"])
+        df = df.sort_values("Data")
 
-        # Retornar o container Flet contendo o gráfico
-        return ft.Container(
-            content=chart,
-            alignment=ft.alignment.center,
-            expand=True
+        # Adicionar uma coluna de mês para filtro
+        df["Month"] = df["Data"].apply(lambda x: str(x.year) + "-" + str(x.month))
+
+        # Criar um gráfico de linha para mostrar a evolução do valor total ao longo do tempo
+        plt.figure(figsize=(10, 6))
+        plt.plot(df['Data'], df['Valor_Total'])
+        plt.xlabel('Data')
+        plt.ylabel('Valor Total')
+        plt.title('Evolução do Valor Total ao Longo do Tempo')
+        # Salve o gráfico em um arquivo
+        plt.savefig('PDV/img/grafico.png')
+        return ft.Image(
+            src='PDV/img/grafico.png',
+            width=800,
+            height=600,
         )
+
 ft.app(target=App)
