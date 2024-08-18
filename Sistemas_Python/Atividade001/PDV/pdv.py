@@ -131,14 +131,59 @@ class App:
 
         def add_to_list(e):
             if Codigo.value and Produto.value and txt_valor.value and txt_number.value.isdigit():
-                items.append([Codigo.value, Produto.value, txt_number.value, txt_valor.value])
-                update_table()
-                Codigo.value = ""
-                Produto.value = ""
-                txt_number.value = ""
-                txt_valor.value = ""
+                # Conecta ao banco de dados e insere os valores
+                conn = sqlite3.connect('PDV/db/cadastrosU.db')
+                cursor = conn.cursor()
+
+                produto = unidecode.unidecode(Produto.value)
+                qtd = txt_number.value
+                # Atualiza a quantidade no estoque para cada item vendido
+            
+                # Primeiro, recupera a quantidade atual do estoque
+                cursor.execute("SELECT Quantidade FROM Estoque WHERE Produto = ?", (produto,))
+                quantidade_atual = cursor.fetchone()
+
+                if quantidade_atual:
+
+                    if int(qtd) >= int(quantidade_atual[0]):
+                        def close_modal(e):
+                            modal.open = False
+                            self.page.update()
+                        modal = ft.AlertDialog(
+                            modal=True,
+                            title=ft.Text("Não Temos Estoque"),
+                            actions=[
+                                ft.TextButton("OK", on_click=close_modal),
+                            ],
+                            actions_alignment=ft.MainAxisAlignment.END
+                        )
+                        self.page.dialog = modal
+                        modal.open = True
+                        self.page.update()
+
+                    else:
+                                
+                        items.append([Codigo.value, Produto.value, txt_number.value, txt_valor.value])
+                        update_table()
+                        Codigo.value = ""
+                        Produto.value = ""
+                        txt_number.value = ""
+                        txt_valor.value = ""
+                        self.page.update()
+                        update_total()
+
+                        nova_quantidade = int(quantidade_atual[0]) - int(qtd)
+
+                        # Atualiza a quantidade no banco de dados
+                        sql = f"UPDATE Estoque SET Quantidade = {nova_quantidade} WHERE Produto = '{produto}'"
+                        print(sql)
+                        cursor.execute(sql)
+                else:
+                    print(f"Produto {produto} não encontrado no estoque.")
+
+                conn.commit()
+                conn.close()
                 self.page.update()
-                update_total()
         
         def delete_item(index):
             def delete_click(e):
@@ -220,28 +265,6 @@ class App:
                 cursor.execute("INSERT INTO Vendas (User, Cliente, Compras, Valor_Total, Data, Estado) VALUES (?, ?, ?, ?, ?, ?)", 
                             (User1, Cliente1, Compras1, Valor1, Data1, Estado1))
 
-                # Atualiza a quantidade no estoque para cada item vendido
-                for item in items:
-                    produto = unidecode.unidecode(item[1])
-                    qtd = item[2]
-
-                    # Primeiro, recupera a quantidade atual do estoque
-                    cursor.execute("SELECT Quantidade FROM Estoque WHERE Produto = ?", (produto,))
-                    quantidade_atual = cursor.fetchone()
-
-                    if quantidade_atual:
-                        if int(qtd):
-                            nova_quantidade = int(quantidade_atual[0]) - int(qtd)
-
-                            # Atualiza a quantidade no banco de dados
-                            sql = f"UPDATE Estoque SET Quantidade = {nova_quantidade} WHERE Produto = '{produto}'"
-                            print(sql)
-                            cursor.execute(sql)
-                        else:
-                            print(f"Quantidade vendida para o produto {produto} é inválida: '{txt_number.value}'")
-                    else:
-                        print(f"Produto {produto} não encontrado no estoque.")
-
                 conn.commit()
                 conn.close()
                 Codigo.value = ""
@@ -277,7 +300,6 @@ class App:
 
 
         def cancelar(e):
-
 
             def on_ok_click(e):
                 # Mostrar outro modal com a opção de pagamento selecionada
