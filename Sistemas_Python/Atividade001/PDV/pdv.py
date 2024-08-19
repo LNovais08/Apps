@@ -272,6 +272,7 @@ class App:
                 txt_number.value = ""
                 txt_valor.value = ""
                 total_text.value = ""
+                desconto_value.value = "00.00%"
                 items.clear()
                 update_table()
                 n_nota_label.value = ids()
@@ -340,6 +341,7 @@ class App:
                 txt_number.value = ""
                 txt_valor.value = ""
                 total_text.value = ""
+                desconto_value.value = "00.00%"
                 items.clear()
                 update_table()
                 n_nota_label.value = ids()
@@ -427,12 +429,14 @@ class App:
             result = cursor.fetchone()[0]
             if result >= 5:
                 # Concede o desconto
-                desconto = 0.05  # 10% de desconto, por exemplo
+                desconto = 0.05 
                 desconto_value.value = f"{desconto * 100}%"
-
+            elif result >= 10:
+                # Concede o desconto
+                desconto = 0.10 
+                desconto_value.value = f"{desconto * 100}%"
             else:
                 desconto_value.value = "00.00%"
-
             desconto_value.update()
             conn.close()
             
