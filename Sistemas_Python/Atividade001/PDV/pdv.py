@@ -7,7 +7,8 @@ import datetime
 import csv
 import pandas as pd
 import matplotlib.pyplot as plt
-
+import re
+import numpy as np
 
 class App:
 
@@ -406,10 +407,10 @@ class App:
         hora_value = ft.Text(value=hora, size=19, color="black")
 
         cpf_label = ft.Text(value="CPF: ", size=20, font_family="Times New Roman", color="black")
-
+        
         def format_cpf(e):
             # Remove non-digit characters and limit to 11 characters
-            raw_cpf = ''.join(filter(str.isdigit, cpf_value.value))[:11]
+            raw_cpf = ''.join(filter(str.isdigit, e.control.value))[:11]
 
             # Format the CPF
             formatted_cpf = raw_cpf
@@ -419,8 +420,27 @@ class App:
                 formatted_cpf = f"{raw_cpf[:3]}.{raw_cpf[3:6]}.{raw_cpf[6:]}"
             elif len(raw_cpf) > 3:
                 formatted_cpf = f"{raw_cpf[:3]}.{raw_cpf[3:]}"
-            cpf_value.value = formatted_cpf
+            e.control.value = formatted_cpf
             self.page.update()
+
+        def validate_cpf(e):
+            cpf = e.control.value.replace('.', '').replace('-', '')
+            if len(cpf) != 11 or not cpf.isdigit():
+                return False
+            soma1 = sum(int(digit) * weight for digit, weight in zip(cpf, range(10, 1, -1)))
+            soma2 = sum(int(digit) * weight for digit, weight in zip(cpf, range(11, 1, -1)))
+            resto1 = 11 - soma1 % 11
+            resto2 = 11 - soma2 % 11
+            if resto1 > 9:
+                resto1 = 0
+            if resto2 > 9:
+                resto2 = 0
+            resp = cpf[-2] == str(resto1) and cpf[-1] == str(resto2)
+            if resp:
+                print(cpf, "Valido")
+            else:
+                cpf_value.value = "CPF Inválido!!!"
+                self.page.update()
 
         def buscador(e):
             conn = sqlite3.connect('PDV/db/cadastrosU.db')
@@ -439,6 +459,10 @@ class App:
                 desconto_value.value = "00.00%"
             desconto_value.update()
             conn.close()
+        
+        def on_blur_cpf(e):
+            buscador(e)
+            validate_cpf(e)
             
         cpf_value = ft.TextField(
             hint_text="Digite seu CPF...",
@@ -452,7 +476,7 @@ class App:
             border_color="transparent",
             filled=True, 
             bgcolor=ft.colors.GREY_300,
-            on_blur=buscador
+            on_blur=on_blur_cpf
         )
         
         with open("temp_user_info.json", "r") as temp_file:
