@@ -7,7 +7,7 @@ import datetime
 import csv
 import pandas as pd
 import matplotlib.pyplot as plt
-import re
+import subprocess
 import numpy as np
 
 class App:
@@ -39,7 +39,8 @@ class App:
         # Barra de aplicativos com menu
         menu_items = [
             ft.PopupMenuItem(text="PDV", icon="MONETIZATION_ON", on_click=self.show_pdv),
-            ft.PopupMenuItem(text="Home", icon="HOME", on_click=self.show_home)
+            ft.PopupMenuItem(text="Home", icon="HOME", on_click=self.show_home),
+            ft.PopupMenuItem(text="Sair", icon="Close", on_click=self.fechar)
         ]
 
         if user_info['grau'] == "Admin":
@@ -66,6 +67,12 @@ class App:
         self.show_home(None)
 
     #MOSTRAR AS PAGINAS DE FORMA CORRETA
+    def fechar(self, e):
+        self.page.window_close()
+        # Executa outro script Python
+        script_path = "./PDV/login.py"
+        subprocess.call(["python", script_path])
+
     def show_pdv(self, e):
         self.hide_background_image()
         if self.current_page:
