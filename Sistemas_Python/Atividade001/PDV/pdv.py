@@ -271,24 +271,69 @@ class App:
                 Estado1 = "Pago"
 
                 # Cria a nota fiscal
-                nota_fiscal = f"""
-                NOTA FISCAL
-                =====================
-                Data: {Data1}
-                Hora: {hora}
-                Caixa: {User1}
-                Cliente: {Cliente1}
-                Compras: {Compras1}
-                Valor Total: R$ {Valor1}
-                Estado: {Estado1}
-                =====================
-                """
+                nota_fiscal = ft.Column(
+                    [
+                        ft.Text("NOTA FISCAL", size=24, font_family="Arial", color="white", text_align="center"),
+                        ft.Divider(thickness=2, color="white"),
+                        ft.Row(
+                            [
+                                ft.Text("Data:", size=18, font_family="Arial", color="white"),
+                                ft.Text(Data1, size=18, font_family="Arial", color="white"),
+                            ],
+                            alignment="center",
+                        ),
+                        ft.Row(
+                            [
+                                ft.Text("Hora:", size=18, font_family="Arial", color="white"),
+                                ft.Text(hora, size=18, font_family="Arial", color="white"),
+                            ],
+                            alignment="center",
+                        ),
+                        ft.Row(
+                            [
+                                ft.Text("Caixa:", size=18, font_family="Arial", color="white"),
+                                ft.Text(User1, size=18, font_family="Arial", color="white"),
+                            ],
+                            alignment="center",
+                        ),
+                        ft.Row(
+                            [
+                                ft.Text("Cliente:", size=18, font_family="Arial", color="white"),
+                                ft.Text(Cliente1, size=18, font_family="Arial", color="white"),
+                            ],
+                            alignment="center",
+                        ),
+                        ft.Row(
+                            [
+                                ft.Text("Compras:", size=18, font_family="Arial", color="white"),
+                                ft.Text(Compras1, size=18, font_family="Arial", color="white"),
+                            ],
+                            alignment="center",
+                        ),
+                        ft.Row(
+                            [
+                                ft.Text("Valor Total:", size=18, font_family="Arial", color="white"),
+                                ft.Text(f"R$ {Valor1}", size=18, font_family="Arial", color="white"),
+                            ],
+                            alignment="center",
+                        ),
+                        ft.Row(
+                            [
+                                ft.Text("Estado:", size=18, font_family="Arial", color="white"),
+                                ft.Text(Estado1, size=18, font_family="Arial", color="white"),
+                            ],
+                            alignment="center",
+                        ),
+                        ft.Divider(thickness=2, color="white"),
+                    ],
+                    alignment="center",
+                )
 
                 # Exibe a nota fiscal na tela
                 nota_fiscal_modal = ft.AlertDialog(
                     modal=True,
                     title=ft.Text("Nota Fiscal"),
-                    content=ft.Text(nota_fiscal),
+                    content=nota_fiscal,
                     actions=[
                         ft.TextButton("OK", on_click=lambda e: close_nota_fiscal_modal(nota_fiscal_modal)),
                     ],
