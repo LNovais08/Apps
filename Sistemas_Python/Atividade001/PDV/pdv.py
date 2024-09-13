@@ -245,6 +245,7 @@ class App:
                     title=ft.Text("Confirmar Pagamento"),
                     content=ft.Text(f"Forma de Pagamento escolhida: {selected_payment.value}"),
                     actions=[
+                        ft.TextButton("Emitir Nota Fiscal", on_click=lambda e: gerar_nota_fiscal(second_modal)),
                         ft.TextButton("OK", on_click=lambda e: close_second_modal(second_modal)),
                     ],
                     actions_alignment=ft.MainAxisAlignment.END
@@ -252,7 +253,55 @@ class App:
                 self.page.dialog = second_modal
                 second_modal.open = True
                 self.page.update()
+            
+            def gerar_nota_fiscal(e):
+                # Obtém a data e hora atuais
+                now = datetime.datetime.now()
+                # Formata a data e hora como string
+                data = now.strftime("%d/%m/%Y")
+                hora = now.strftime("%H:%M")
 
+                # Obtém os dados da compra
+                User1 = caixa_value.value
+                Cliente1 = cpf_value.value
+                Compras = [unidecode.unidecode(item[1]) for item in items]  # Pega todos os valores da coluna "Produto"
+                Compras1 = json.dumps(Compras)
+                Valor1 = total_text.value.replace("Total: R$ ", '').strip()
+                Data1 = data
+                Estado1 = "Pago"
+
+                # Cria a nota fiscal
+                nota_fiscal = f"""
+                NOTA FISCAL
+                =====================
+                Data: {Data1}
+                Hora: {hora}
+                Caixa: {User1}
+                Cliente: {Cliente1}
+                Compras: {Compras1}
+                Valor Total: R$ {Valor1}
+                Estado: {Estado1}
+                =====================
+                """
+
+                # Exibe a nota fiscal na tela
+                nota_fiscal_modal = ft.AlertDialog(
+                    modal=True,
+                    title=ft.Text("Nota Fiscal"),
+                    content=ft.Text(nota_fiscal),
+                    actions=[
+                        ft.TextButton("OK", on_click=lambda e: close_nota_fiscal_modal(nota_fiscal_modal)),
+                    ],
+                    actions_alignment=ft.MainAxisAlignment.END
+                )
+                self.page.dialog = nota_fiscal_modal
+                nota_fiscal_modal.open = True
+                self.page.update()
+
+            def close_nota_fiscal_modal(modal):
+                modal.open = False
+                self.page.update()
+            
             def close_second_modal(modal):
                 modal.open = False
                 # Obtém a data e hora atuais
@@ -307,7 +356,7 @@ class App:
             modal.open = True
             self.page.update()
 
-
+        
         def cancelar(e):
 
             def on_ok_click(e):
