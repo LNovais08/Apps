@@ -32,6 +32,7 @@ class App:
         )
         self.current_page = None  # Armazenará a página atualmente visível
 
+
         # Ler as informações do usuário do arquivo temporário
         with open("temp_user_info.json", "r") as temp_file:
             user_info = json.load(temp_file)
@@ -40,7 +41,11 @@ class App:
         menu_items = [
             ft.PopupMenuItem(text="PDV", icon="MONETIZATION_ON", on_click=self.show_pdv),
             ft.PopupMenuItem(text="Home", icon="HOME", on_click=self.show_home),
+<<<<<<< Updated upstream
             ft.PopupMenuItem(text="Sair", icon="Close", on_click=self.fechar)
+=======
+            ft.PopupMenuItem(text="Sair", icon="CLOSE", on_click=self.closepdv)
+>>>>>>> Stashed changes
         ]
 
         if user_info['grau'] == "Admin":
@@ -82,6 +87,11 @@ class App:
         self.page.add(self.current_page)
         self.page.update()
 
+    def closepdv(self, e):
+        self.page.window_close()
+        script_path = "./PDV/login.py"
+        subprocess.call(["python", script_path])
+    
     def show_cadastro_usuario(self, e):
         self.hide_background_image()
         if self.current_page:
