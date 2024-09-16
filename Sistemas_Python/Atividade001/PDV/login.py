@@ -20,7 +20,7 @@ def main(page: Page):
     # Criando o contêiner tela com imagem de fundo
     img_container = ft.Container(
         content=ft.Image(
-            src='PDV/img/login2.jpg',
+            src='./img/login2.jpg',
             width=page.window_width,
             height=page.window_height,
             fit=ft.ImageFit.COVER,
@@ -30,7 +30,7 @@ def main(page: Page):
 
     # Função para conectar ao banco de dados e criar a tabela se não existir
     def init_db():
-        conn = sqlite3.connect('PDV/db/cadastrosU.db')
+        conn = sqlite3.connect('./db/cadastrosU.db')
         cursor = conn.cursor()
         cursor.execute('''CREATE TABLE IF NOT EXISTS cadastros_Usuarios
                           (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, Tel TEXT ,email TEXT, sexo TEXT , grau TEXT,senha TEXT)''')
@@ -81,14 +81,14 @@ def main(page: Page):
             page.update()
         else:
             # Conecta ao banco de dados e insere os valores
-            conn = sqlite3.connect('PDV/db/cadastrosU.db')
+            conn = sqlite3.connect('./db/cadastrosU.db')
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM cadastros_Usuarios WHERE email=? AND senha=?", (email1, senha1))
             result = cursor.fetchone()
             conn.close()
             if result:
                 # Conecta ao banco de dados e verifica os valores
-                conn = sqlite3.connect('PDV/db/cadastrosU.db')
+                conn = sqlite3.connect('./db/cadastrosU.db')
                 cursor = conn.cursor()
                 cursor.execute("SELECT * FROM cadastros_Usuarios WHERE email=? AND senha=?", (email1, senha1))
                 result = cursor.fetchone()
@@ -102,12 +102,12 @@ def main(page: Page):
                         'sexo': result[4],
                         'grau': result[5]
                     }
-                    with open("PDV/temp_user_info.json", "w") as temp_file:
+                    with open("./principal/temp_user_info.json", "w") as temp_file:
                         json.dump(user_info, temp_file)
                 # Fecha a tela atual
                 page.window_close()
                 # Executa outro script Python
-                script_path = "./PDV/pdv.py"
+                script_path = "./principal/pdv.py"
                 subprocess.call(["python", script_path])
             else:
                 email_login.error_text = "E-mail ou senha incorretos"
