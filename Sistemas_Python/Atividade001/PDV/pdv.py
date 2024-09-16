@@ -34,18 +34,14 @@ class App:
 
 
         # Ler as informações do usuário do arquivo temporário
-        with open("temp_user_info.json", "r") as temp_file:
+        with open("PDV/temp_user_info.json", "r") as temp_file:
             user_info = json.load(temp_file)
 
         # Barra de aplicativos com menu
         menu_items = [
             ft.PopupMenuItem(text="PDV", icon="MONETIZATION_ON", on_click=self.show_pdv),
             ft.PopupMenuItem(text="Home", icon="HOME", on_click=self.show_home),
-<<<<<<< Updated upstream
-            ft.PopupMenuItem(text="Sair", icon="Close", on_click=self.fechar)
-=======
-            ft.PopupMenuItem(text="Sair", icon="CLOSE", on_click=self.closepdv)
->>>>>>> Stashed changes
+            ft.PopupMenuItem(text="Sair", icon="Close", on_click=self.closepdv)
         ]
 
         if user_info['grau'] == "Admin":
@@ -72,12 +68,6 @@ class App:
         self.show_home(None)
 
     #MOSTRAR AS PAGINAS DE FORMA CORRETA
-    def fechar(self, e):
-        self.page.window_close()
-        # Executa outro script Python
-        script_path = "./PDV/login.py"
-        subprocess.call(["python", script_path])
-
     def show_pdv(self, e):
         self.hide_background_image()
         if self.current_page:
@@ -590,7 +580,7 @@ class App:
             on_blur=on_blur_cpf
         )
         
-        with open("temp_user_info.json", "r") as temp_file:
+        with open("PDV/temp_user_info.json", "r") as temp_file:
             user_info = json.load(temp_file)
         
         caixa_label = ft.Text(value="Caixa: ", size=20, font_family="Times New Roman", color="black")
@@ -1050,13 +1040,13 @@ class App:
         conn.close()
 
         # Salvar os dados em um arquivo CSV
-        with open('vendas_data.csv', mode='w', newline='') as file:
+        with open('PDV/vendas_data.csv', mode='w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(["Valor_Total", "Data", "Estado"])  # Cabeçalhos
             writer.writerows(vendas_data)
 
         # Ler os dados do CSV
-        df = pd.read_csv("vendas_data.csv", sep=",", decimal=".")
+        df = pd.read_csv("PDV/vendas_data.csv", sep=",", decimal=".")
         df["Data"] = pd.to_datetime(df["Data"])
         df = df.sort_values("Data")
 

@@ -102,7 +102,7 @@ def main(page: Page):
                         'sexo': result[4],
                         'grau': result[5]
                     }
-                    with open("temp_user_info.json", "w") as temp_file:
+                    with open("PDV/temp_user_info.json", "w") as temp_file:
                         json.dump(user_info, temp_file)
                 # Fecha a tela atual
                 page.window_close()
