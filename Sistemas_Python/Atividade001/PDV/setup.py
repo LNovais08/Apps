@@ -14,9 +14,15 @@ options = {
     "build_exe": {
         "packages": [],  # Pacotes adicionais se necessário
         "include_files": [
+<<<<<<< Updated upstream
             "db/",        # Inclui a pasta 'telas'
             "img/",  # Inclui a pasta 'formularios'
             "principal/"        # Inclui a pasta 'banco'
+=======
+            "db/",        # Inclui a pasta 'db'
+            "img/",  # Inclui a pasta 'img'
+            "principal/",        # Inclui a pasta 'principal'
+>>>>>>> Stashed changes
         ]
     }
 }
@@ -28,4 +34,8 @@ setup(
     description="Gerenciar provisões e estornos da Expresso Nepomuceno",
     options=options,
     executables=executables
+<<<<<<< Updated upstream
 )
+=======
+)
+>>>>>>> Stashed changes

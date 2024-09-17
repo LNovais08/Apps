@@ -34,7 +34,11 @@ class App:
 
 
         # Ler as informações do usuário do arquivo temporário
+<<<<<<< Updated upstream
         with open("./principal/temp_user_info.json", "r") as temp_file:
+=======
+        with open("PDV/principal/temp_user_info.json", "r") as temp_file:
+>>>>>>> Stashed changes
             user_info = json.load(temp_file)
 
         # Barra de aplicativos com menu
@@ -68,6 +72,10 @@ class App:
         self.show_home(None)
 
     #MOSTRAR AS PAGINAS DE FORMA CORRETA
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
     def show_pdv(self, e):
         self.hide_background_image()
         if self.current_page:
