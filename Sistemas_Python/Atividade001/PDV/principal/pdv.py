@@ -1146,8 +1146,4 @@ class App:
             ),
             alignment=ft.alignment.center,
         )
-<<<<<<< Updated upstream
-=======
-        return img
->>>>>>> Stashed changes
 ft.app(target=App)
