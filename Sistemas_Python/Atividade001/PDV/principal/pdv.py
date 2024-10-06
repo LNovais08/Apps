@@ -11,14 +11,14 @@ import subprocess
 import numpy as np
 
 class App:
-
     def  __init__(self, page: Page):
+        page.theme_mode = "light"
         self.page = page
         self.page.title = "SuperMarket"
         # Centralizar a janela na tela
-        self.page.window_center()
-        self.page.window_resizable = False
-        self.page.padding = 40
+        self.page.window.center()
+        self.page.padding = 0
+        self.page.window.resizable = False
         self.page.bgcolor = "WHITE"
         self.background_image = ft.Container(
             content=ft.Image(
@@ -32,9 +32,8 @@ class App:
         )
         self.current_page = None  # Armazenará a página atualmente visível
 
-
         # Ler as informações do usuário do arquivo temporário
-        with open("./principal/temp_user_info.json", "r") as temp_file:
+        with open("temp_user_info.json", "r") as temp_file:
             user_info = json.load(temp_file)
 
         # Barra de aplicativos com menu
@@ -52,16 +51,12 @@ class App:
             ])
         # Barra de aplicativos com menu
         self.page.appbar = ft.AppBar(
-            leading=ft.Icon(ft.icons.STORAGE),
-            leading_width=40,
-            title=ft.Text("SuperMarket"),
+            leading=ft.Icon(ft.icons.SHOPPING_BAG, color="white"),
+            leading_width=50,
+            title=ft.Text("SuperMarket", color="white"),
             center_title=False,
-            bgcolor=ft.colors.SURFACE_VARIANT,
-            actions=[
-                ft.PopupMenuButton(
-                    items=menu_items
-                ),
-            ],
+            bgcolor=ft.colors.BLACK54,
+            actions=[ft.PopupMenuButton(items=menu_items)],
         )
 
         # Mostra a página inicial ao iniciar o aplicativo
@@ -195,8 +190,17 @@ class App:
         
         def delete_item(index):
             def delete_click(e):
-                items.pop(index)
-                update_table()
+                # Remove o prefixo "Total: R$" e converte o valor para float
+                total_str = total_text.value.replace("Total: R$ ", "").replace(",", ".")
+                total_value = float(total_str)  # Converte para float
+                # Converte quantidade e valor
+                qtd = int(items[index][2])  # Converte a quantidade para inteiro
+                valor = float(items[index][3])  # Converte o valor para float
+                # Atualiza o total subtraindo o valor calculado
+                total_text.value = f"Total: R$ {total_value - (qtd * valor):.2f}"
+                items.pop(index)  # Remove o item da lista de itens
+                update_table()  # Atualiza a tabela
+
             return delete_click
         
         def edit_item(index):
@@ -264,67 +268,83 @@ class App:
                 # Obtém os dados da compra
                 User1 = caixa_value.value
                 Cliente1 = cpf_value.value
-                Compras = [unidecode.unidecode(item[1]) for item in items]  # Pega todos os valores da coluna "Produto"
-                Compras1 = json.dumps(Compras)
                 Valor1 = total_text.value.replace("Total: R$ ", '').strip()
                 Data1 = data
                 Estado1 = "Pago"
 
+                # Cria uma tabela para exibir as compras
+                compras_tabela = ft.DataTable(
+                    columns=[
+                        ft.DataColumn(ft.Text("Produto", size=18, font_family="Arial", color="black")),
+                        ft.DataColumn(ft.Text("Quantidade", size=18, font_family="Arial", color="black")),
+                        ft.DataColumn(ft.Text("Valor", size=18, font_family="Arial", color="black")),
+                    ],
+                    rows=[
+                        ft.DataRow(
+                            cells=[
+                                ft.DataCell(ft.Text(item[1], size=18, font_family="Arial", color="black")),
+                                ft.DataCell(ft.Text(str(item[2]), size=18, font_family="Arial", color="black")),
+                                ft.DataCell(ft.Text(f"R$ {float(item[3]):.2f}", size=18, font_family="Arial", color="black")),
+                            ]
+                        ) for item in items
+                    ],
+                )
+
                 # Cria a nota fiscal
                 nota_fiscal = ft.Column(
                     [
-                        ft.Text("NOTA FISCAL", size=24, font_family="Arial", color="white", text_align="center"),
-                        ft.Divider(thickness=2, color="white"),
+                        ft.Text("Número da Nota", size=24, font_family="Arial", color="black", text_align="center"),
+                        ft.Text(n_nota_label.value, size=24, font_family="Arial", color="black", text_align="center"),
+                        ft.Divider(thickness=2, color="black"),
                         ft.Row(
                             [
-                                ft.Text("Data:", size=18, font_family="Arial", color="white"),
-                                ft.Text(Data1, size=18, font_family="Arial", color="white"),
+                                ft.Text("Data:", size=18, font_family="Arial", color="black"),
+                                ft.Text(Data1, size=18, font_family="Arial", color="black"),
+                            ],
+                            alignment="start",
+                        ),
+                        ft.Row(
+                            [
+                                ft.Text("Hora:", size=18, font_family="Arial", color="black"),
+                                ft.Text(hora, size=18, font_family="Arial", color="black"),
+                            ],
+                            alignment="start",
+                        ),
+                        ft.Row(
+                            [
+                                ft.Text("Caixa:", size=18, font_family="Arial", color="black"),
+                                ft.Text(User1, size=18, font_family="Arial", color="black"),
+                            ],
+                            alignment="start",
+                        ),
+                        ft.Row(
+                            [
+                                ft.Text("Cliente:", size=18, font_family="Arial", color="black"),
+                                ft.Text(Cliente1, size=18, font_family="Arial", color="black"),
+                            ],
+                            alignment="start",
+                        ),
+                        ft.Row(
+                            [
+                                compras_tabela
                             ],
                             alignment="center",
                         ),
                         ft.Row(
                             [
-                                ft.Text("Hora:", size=18, font_family="Arial", color="white"),
-                                ft.Text(hora, size=18, font_family="Arial", color="white"),
+                                ft.Text("Valor Total:", size=18, font_family="Arial", color="black"),
+                                ft.Text(f"R$ {Valor1}", size=18, font_family="Arial", color="black"),
                             ],
-                            alignment="center",
+                            alignment="start",
                         ),
                         ft.Row(
                             [
-                                ft.Text("Caixa:", size=18, font_family="Arial", color="white"),
-                                ft.Text(User1, size=18, font_family="Arial", color="white"),
+                                ft.Text("Estado:", size=18, font_family="Arial", color="black"),
+                                ft.Text(Estado1, size=18, font_family="Arial", color="black"),
                             ],
-                            alignment="center",
+                            alignment="start",
                         ),
-                        ft.Row(
-                            [
-                                ft.Text("Cliente:", size=18, font_family="Arial", color="white"),
-                                ft.Text(Cliente1, size=18, font_family="Arial", color="white"),
-                            ],
-                            alignment="center",
-                        ),
-                        ft.Row(
-                            [
-                                ft.Text("Compras:", size=18, font_family="Arial", color="white"),
-                                ft.Text(Compras1, size=18, font_family="Arial", color="white"),
-                            ],
-                            alignment="center",
-                        ),
-                        ft.Row(
-                            [
-                                ft.Text("Valor Total:", size=18, font_family="Arial", color="white"),
-                                ft.Text(f"R$ {Valor1}", size=18, font_family="Arial", color="white"),
-                            ],
-                            alignment="center",
-                        ),
-                        ft.Row(
-                            [
-                                ft.Text("Estado:", size=18, font_family="Arial", color="white"),
-                                ft.Text(Estado1, size=18, font_family="Arial", color="white"),
-                            ],
-                            alignment="center",
-                        ),
-                        ft.Divider(thickness=2, color="white"),
+                        ft.Divider(thickness=2, color="black"),
                     ],
                     alignment="center",
                 )
@@ -335,7 +355,7 @@ class App:
                     title=ft.Text("Nota Fiscal"),
                     content=nota_fiscal,
                     actions=[
-                        ft.TextButton("OK", on_click=lambda e: close_nota_fiscal_modal(nota_fiscal_modal)),
+                        ft.TextButton("OK", on_click=lambda e: close_second_modal(nota_fiscal_modal)),
                     ],
                     actions_alignment=ft.MainAxisAlignment.END
                 )
@@ -343,9 +363,6 @@ class App:
                 nota_fiscal_modal.open = True
                 self.page.update()
 
-            def close_nota_fiscal_modal(modal):
-                modal.open = False
-                self.page.update()
             
             def close_second_modal(modal):
                 modal.open = False
@@ -475,6 +492,7 @@ class App:
             style=ft.ButtonStyle(
                 shape={"": ft.RoundedRectangleBorder(radius=5)}  # Cantos retos
             ),
+            bgcolor="black",
             on_click=add_to_list
         )
         def ids():
@@ -580,7 +598,7 @@ class App:
             on_blur=on_blur_cpf
         )
         
-        with open("./principal/temp_user_info.json", "r") as temp_file:
+        with open("temp_user_info.json", "r") as temp_file:
             user_info = json.load(temp_file)
         
         caixa_label = ft.Text(value="Caixa: ", size=20, font_family="Times New Roman", color="black")
@@ -634,13 +652,18 @@ class App:
         )
         # Create the main navigation container
         nave = ft.Container(
-            content=ft.Row([div1, div2, div3, div4, div5, div6, div7], spacing=20, alignment=ft.alignment.center),
+            content=ft.Row(
+                [div1, div2, div3, div4, div5, div6, div7],
+                spacing=25,
+                alignment=ft.MainAxisAlignment.CENTER,  # Alinha horizontalmente no centro
+                vertical_alignment=ft.CrossAxisAlignment.CENTER  # Alinha verticalmente no centro
+            ),
             alignment=ft.alignment.center,
-            padding=ft.padding.all(10),
+            padding=ft.padding.all(15),
             bgcolor=ft.colors.GREY_300,
             height=120,
-            border_radius=ft.border_radius.all(10)
         )
+
         # Definindo as colunas do DataGrid
         columns = [
             DataColumn(Text("Código", color=ft.colors.BLACK)),
@@ -680,6 +703,7 @@ class App:
             width=120,
             height=35,
             color="white",
+            bgcolor="black",
             style=ft.ButtonStyle(
                 shape={"": ft.RoundedRectangleBorder(radius=5)}
             ),
@@ -690,6 +714,7 @@ class App:
             width=120,
             height=35,
             color="white",
+            bgcolor="black",
             style=ft.ButtonStyle(
                 shape={"": ft.RoundedRectangleBorder(radius=5)}
             ),
@@ -779,6 +804,7 @@ class App:
             border_color="black",
             border_radius=5,
             label_style=ft.TextStyle(color="black"),
+            prefix_icon=ft.icons.PERSON
         )
 
         tel = ft.TextField(
@@ -789,7 +815,8 @@ class App:
             border_color="black",
             border_radius=5,
             label_style=ft.TextStyle(color="black"),
-            on_change=format_telefone
+            on_change=format_telefone,
+            prefix_icon=ft.icons.PHONE
         )
 
         email = ft.TextField(
@@ -800,6 +827,7 @@ class App:
             border_color="black",
             border_radius=5,
             label_style=ft.TextStyle(color="black"),
+            prefix_icon=ft.icons.EMAIL
         )
 
         sexo = ft.RadioGroup(
@@ -833,6 +861,7 @@ class App:
             border_color="black",
             border_radius=5,
             label_style=ft.TextStyle(color="black"),
+            prefix_icon=ft.icons.KEY
         )
 
         # Botão de Cadastro
@@ -847,13 +876,17 @@ class App:
             width=250,
             height=50
         )
-
+        img = ft.Image(
+            src='./img/logo-CadU.png',
+            width=100,
+            height=100
+        )
         # Layout do formulário
         cadastrou = ft.Column(
-            controls=[nome, tel, email, sexo, adm, senha, cadastrar_button],
+            controls=[img,nome, tel, email, sexo, adm, senha, cadastrar_button],
             alignment=ft.MainAxisAlignment.CENTER,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-            spacing=20
+            spacing=10
         )
 
         # Contêiner principal com estilos
@@ -866,23 +899,40 @@ class App:
             bgcolor="rgba(0, 0, 0, 0.5)",
             alignment=ft.alignment.center
         )
-
-
-            
-        bg = ft.Stack(
-                controls=[
-                    ft.Image(
-                        src="./img/CD.jpg",  # Substitua pela URL da sua imagem de fundo
-                        fit=ft.ImageFit.COVER,
-                        expand=True,
-                        width= 20000,
+        main = ft.ResponsiveRow(
+            [
+                ft.Container(
+                    content=ft.Image(
+                        src='./img/img-CadU.jpg',
+                        fit=ft.ImageFit.COVER,  
                     ),
-                    form_container  # O formulário sobrepõe a imagem de fundo
-                ],
-                alignment=ft.alignment.center,
-                expand=True
-            )
-        return bg
+                    alignment=ft.alignment.center,
+                    expand=True,
+                    col={"sm": 6, "md": 6, "xl": 6},
+                ),
+                ft.Container(
+                        content=ft.Stack(
+                        controls=[
+                            ft.Image(
+                                src="./img/CD.jpg",  # Substitua pela URL da sua imagem de fundo
+                                fit=ft.ImageFit.COVER,
+                                expand=True,
+                            ),
+                            form_container  # O formulário sobrepõe a imagem de fundo
+                        ],
+                        alignment=ft.alignment.center,
+                        expand=True
+                    ),
+                    alignment=ft.alignment.center,
+                    expand=True,
+                    col={"sm": 6, "md": 6, "xl": 6},
+                ),
+                
+            ],
+            spacing=0,
+            vertical_alignment=ft.CrossAxisAlignment.CENTER
+        ) 
+        return main
     
     #CRIANDO CADASTRO DE PRODUTOS
     def create_cadastro_produto_page(self):
@@ -929,6 +979,7 @@ class App:
             text_size=18,
             border_color="black",
             border_radius=5,
+            prefix_icon=ft.icons.SHOPPING_BAG
         )
 
         valor_unit = ft.TextField(
@@ -938,6 +989,7 @@ class App:
             color="black",
             border_color="black",
             border_radius=5,
+            prefix_icon=ft.icons.MONEY
         )
 
         qtd = ft.TextField(
@@ -948,6 +1000,7 @@ class App:
             text_size=18,
             border_color="black",
             border_radius=5,
+            prefix_icon=ft.icons.NUMBERS
         )
 
         def handle_date_change(e: ft.ControlEvent):
@@ -993,10 +1046,14 @@ class App:
             width=250,
             height=50,
         )
-
+        img = ft.Image(
+            src='./img/logo-CadP.png',
+            width=100,
+            height=100
+        )
         # Layout do formulário
         cadastrou = ft.Column(
-            controls=[produto, valor_unit, qtd, linha, cadastrar_button],
+            controls=[img, produto, valor_unit, qtd, linha, cadastrar_button],
             alignment=ft.MainAxisAlignment.CENTER,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             spacing=20  # Espaçamento vertical entre os controles na coluna
@@ -1013,20 +1070,40 @@ class App:
             alignment=ft.alignment.center
         )
 
-        bg = ft.Stack(
-                controls=[
-                    ft.Image(
-                        src="./img/CD.jpg",  # Substitua pela URL da sua imagem de fundo
-                        fit=ft.ImageFit.COVER,
-                        expand=True,
-                        width= 20000,
+        main = ft.ResponsiveRow(
+            [
+                ft.Container(
+                    content=ft.Image(
+                        src='./img/img-CadP.jpg',
+                        fit=ft.ImageFit.COVER,  
                     ),
-                    form_container  # O formulário sobrepõe a imagem de fundo
-                ],
-                alignment=ft.alignment.center,
-                expand=True
-            )
-        return bg
+                    alignment=ft.alignment.center,
+                    expand=True,
+                    col={"sm": 6, "md": 6, "xl": 6},
+                ),
+                ft.Container(
+                        content=ft.Stack(
+                        controls=[
+                            ft.Image(
+                                src="./img/CD.jpg",  # Substitua pela URL da sua imagem de fundo
+                                fit=ft.ImageFit.COVER,
+                                expand=True,
+                            ),
+                            form_container  # O formulário sobrepõe a imagem de fundo
+                        ],
+                        alignment=ft.alignment.center,
+                        expand=True
+                    ),
+                    alignment=ft.alignment.center,
+                    expand=True,
+                    col={"sm": 6, "md": 6, "xl": 6},
+                ),
+                
+            ],
+            spacing=0,
+            vertical_alignment=ft.CrossAxisAlignment.CENTER
+        ) 
+        return main
 
     #CRIANDO CADASTRO DE VENDAS
     def create_vendas_page(self):
@@ -1040,13 +1117,13 @@ class App:
         conn.close()
 
         # Salvar os dados em um arquivo CSV
-        with open('./principal/vendas_data.csv', mode='w', newline='') as file:
+        with open('vendas_data.csv', mode='w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(["Valor_Total", "Data", "Estado"])  # Cabeçalhos
             writer.writerows(vendas_data)
 
         # Ler os dados do CSV
-        df = pd.read_csv("./principal/vendas_data.csv", sep=",", decimal=".")
+        df = pd.read_csv("vendas_data.csv", sep=",", decimal=".")
         df["Data"] = pd.to_datetime(df["Data"])
         df = df.sort_values("Data")
 
@@ -1061,9 +1138,16 @@ class App:
         plt.title('Evolução do Valor Total ao Longo do Tempo')
         # Salve o gráfico em um arquivo
         plt.savefig('./img/grafico.png')
-        return ft.Image(
-            src='./img/grafico.png',
-            width=800,
-            height=600,
+        img = ft.Container(
+            content=ft.Image(
+                src='./img/grafico.png',
+                fit=ft.ImageFit.COVER,
+                expand=True,
+            ),
+            alignment=ft.alignment.center,
         )
+<<<<<<< Updated upstream
+=======
+        return img
+>>>>>>> Stashed changes
 ft.app(target=App)

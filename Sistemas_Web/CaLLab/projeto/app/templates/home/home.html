@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <title>CaLLab</title>
+    <link rel="icon" href="/media/logo.png" type="image/png">
+</head>
+<style>
+    body {
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+    }
+
+    header {
+        width: 99vw;
+        height: 10vh;
+        background: rgb(37, 85, 124);
+        background: radial-gradient(circle, rgba(37, 85, 124, 1) 0%, rgba(19, 73, 145, 1) 26%, rgba(0, 35, 85, 1) 65%);
+    }
+
+    #principal {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    #um {
+        display: flex;
+        justify-content: center;
+        align-items: start;
+        width: 350px;
+        height: 0px;
+        border: solid 30px transparent;
+        border-bottom: solid 94px rgb(255, 255, 255);
+        border-top: none;
+        position: absolute;
+        left: 0;
+        margin-left: 50px;
+    }
+
+    .btns {
+        height: 10vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        left: 0;
+        margin-top: 0px;
+        margin-left: 450px;
+    }
+
+    button {
+        width: 150px;
+        height: 100%;
+        background-color: transparent;
+        color: #ffffff;
+        font-size: 15px;
+        border: none;
+        cursor: pointer;
+
+        /* Efeito de hover */
+        transition: background-color 0.3s;
+    }
+
+    button:hover {
+        background-color: #010c25fb;
+    }
+
+    main {
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+        align-items: center;
+        width: 99vw;
+        height: 200vh;
+        background-color: rgb(161, 153, 153);
+    }
+
+    #carouselExampleCaptions {
+        width: 99vw;
+    }
+
+    footer {
+        width: 99vw;
+        height: 30vh;
+        background-color: rgb(48, 48, 48);
+    }
+
+    .info1 {
+        display: flex;
+        margin: 0;
+        align-items: center;
+        justify-content: space-around;
+        width: 100%;
+        height: 350px;
+        background: rgb(37, 85, 124);
+        background: radial-gradient(circle, rgba(37, 85, 124, 1) 0%, rgba(19, 73, 145, 1) 26%, rgba(0, 35, 85, 1) 65%);
+    }
+    .card{
+        background-color: transparent;
+        border: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: justify;
+        color: white;
+        font-size: 15px;
+    }
+    .card img {
+        animation: scale 2s infinite ease-in-out;
+    }
+
+    @keyframes scale {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.1);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+    .sobre_nos{
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+        align-items: center;
+        justify-content: space-around;
+        width: 100%;
+        height: 700px;
+        background-color: white;
+    }
+    .infor{
+        display: flex;
+        margin: 0;
+        align-items: center;
+        justify-content: space-around;
+    }
+</style>
+<header>
+    <div id="principal">
+        <div id="um">
+            <img src="media/log.png" alt="" width="200vw" style="margin-top: 10px;">
+        </div>
+        <div class="btns">
+            <button id="btn-F">Fale conosco</button>
+            <button id="btn-I">Informações</button>
+            <button id="btn-S">Sobre nós</button>
+            <button id="btn-L"
+                style="margin-left: 850px; display: flex; justify-content: center; align-items: center;">Entrar</button>
+        </div>
+    </div>
+</header>
+
+<body>
+    <main>
+        <div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active"
+                    aria-current="true" aria-label="Slide 1"></button>
+                <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1"
+                    aria-label="Slide 2"></button>
+                <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2"
+                    aria-label="Slide 3"></button>
+            </div>
+            <div class="carousel-inner">
+                <div class="carousel-item active" data-bs-interval="10000">
+                    <img src="media/0001.jpg" class="d-flex w-100" alt="..." height="700">
+                    <div class="carousel-caption d-none d-md-block">
+                        <h5>Precisão que transforma</h5>
+                        <p>descubra como a metrologia garante a qualidade e a confiabilidade dos seus resultados!</p>
+                    </div>
+                </div>
+                <div class="carousel-item" data-bs-interval="2000">
+                    <img src="media/0002.jpg" class="d-flex w-100" alt="..." height="700">
+                    <div class="carousel-caption d-none d-md-block">
+                        <h5>Metrologia</h5>
+                        <p>A ciência que mede com precisão para garantir a qualidade e a confiança em cada produto que
+                            você utiliza.</p>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="media/0003.jpg" class="d-flex w-100" alt="..." height="700">
+                    <div class="carousel-caption d-none d-md-block">
+                        <h5>Transforme precisão em confiança</h5>
+                        <p>na metrologia, cada medição é um passo em direção à excelência!</p>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions"
+                data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions"
+                data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+        <div class="info1">
+            <div class="card" style="width: 18rem;">
+                <img src="media/confia.png" alt="..." height="90" width="100" >
+                <div class="card-body">
+                    <p class="card-text">Confiança é a base do nosso trabalho: juntos, construímos resultados sólidos e duradouros.</p>
+                </div>
+            </div>
+            <div class="card" style="width: 18rem;">
+                <img src="media/velocidade.png" alt="..." height="90" width="100">
+                <div class="card-body">
+                    <p class="card-text">Na velocidade do trabalho, a eficiência é a chave: agilidade com qualidade para resultados que fazem a diferença!</p>
+                </div>
+            </div>
+            <div class="card" style="width: 18rem;">
+                <img src="media/pedido.png" alt="..." height="90" width="100">
+                <div class="card-body">
+                    <p class="card-text">Atendendo à alta demanda de pedidos com agilidade e comprometimento: sua satisfação é a nossa prioridade!</p>
+                </div>
+            </div>
+        </div>
+        <div class="sobre_nos">
+            <div class="infor">
+                
+            </div>
+            <div class="infor">
+
+            </div>
+            <div class="infor">
+                
+            </div>
+            </div>
+        </div>
+    </main>
+</body>
+<footer>
+
+</footer>
+
+</html>
