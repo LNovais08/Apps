@@ -35,7 +35,38 @@ def main(page: ft.Page):
             formatted_tel = f"({raw_tel[:2]}) {raw_tel[2:]}"
         tel.value = formatted_tel
         page.update()
-    
+
+    def format_data(e):
+        raw_data = ''.join(filter(str.isdigit, e.control.value))[:8]
+
+        formatted_data = raw_data
+        if len(raw_data) > 4:
+            month = int(raw_data[2:4])
+            if month < 1 or month > 12:
+                e.control.error_text = "Mês inválido. Deve ser entre 01 e 12."
+            else:
+                e.control.error_text = None
+            formatted_data = f"{raw_data[:2]}/{raw_data[2:4]}/{raw_data[4:]}"
+        elif len(raw_data) > 2:
+            formatted_data = f"{raw_data[:2]}/{raw_data[2:]}"
+
+        e.control.value = formatted_data
+
+        try:
+            data_nascimento = datetime.strptime(formatted_data, "%d/%m/%Y")
+
+            data_atual = datetime.now()
+            idade = data_atual.year - data_nascimento.year
+
+            if (data_atual.month, data_atual.day) < (data_nascimento.month, data_nascimento.day):
+                idade -= 1
+            
+            idade_field.value = str(idade)
+        except ValueError:
+            idade_field.value = ""  
+
+        e.page.update()
+
     def format_cpf(e):
         # Remove non-digit characters and limit to 11 characters
         raw_cpf = ''.join(filter(str.isdigit, e.control.value))[:11]
@@ -106,18 +137,19 @@ def main(page: ft.Page):
     )
     #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     #Itens para a consulta
+    global idade_field
     cpf = ft.TextField(label="CPF", width=250, on_blur=on_blur_cpf,on_change=format_cpf, prefix_icon=ft.icons.PERSONAL_INJURY_OUTLINED)
     nome = ft.TextField(label="Nome", width=250, prefix_icon=ft.icons.PEOPLE_SHARP)
     tel = ft.TextField(label="Telefone", width=250, on_change=format_telefone, prefix_icon=ft.icons.PHONE)
-    idade = ft.TextField(label="Idade", width=120, prefix_icon=ft.icons.NUMBERS)
-    data_nascimento = ft.TextField(label="Data de Nascimento", width=305, prefix_icon=ft.icons.CALENDAR_MONTH)
+    idade_field = ft.TextField(label="Idade", width=120, prefix_icon=ft.icons.NUMBERS, keyboard_type=ft.KeyboardType.NUMBER,read_only=True)
+    data_nascimento = ft.TextField(label="Data de Nascimento", width=305, prefix_icon=ft.icons.CALENDAR_MONTH,keyboard_type=ft.KeyboardType.NUMBER,on_change=format_data)
     pc = ft.Column([
         ft.Text("Paciente", size=40, weight="bold"),
     ], 
         alignment=ft.MainAxisAlignment.START
     )
     linha1_paciente = ft.Row([cpf,nome,tel], alignment=ft.MainAxisAlignment.CENTER)
-    linha2_paciente = ft.Row([idade,data_nascimento,
+    linha2_paciente = ft.Row([idade_field,data_nascimento,
         ft.Dropdown(label="Convênio", width=325 , options=[
             ft.dropdown.Option("Unimed"),
             ft.dropdown.Option("SUS"),

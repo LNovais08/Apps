@@ -35,7 +35,7 @@ def main(page: ft.Page):
                 page.update()
             else:
                 # Conecta ao banco de dados e insere os valores
-                conn = sqlite3.connect('./db/cadastrosU.db')
+                conn = sqlite3.connect('../db/cadastrosU.db')
                 cursor = conn.cursor()
             
                 cursor.execute("SELECT * FROM cadastros_Usuarios WHERE email=? AND senha=?", (email1, senha1))
@@ -50,13 +50,13 @@ def main(page: ft.Page):
                         'sexo': result[4],
                         'grau': result[5]
                     }
-                    with open("./temp_user_info.json", "w") as temp_file:
+                    with open("../temp_user_info.json", "w") as temp_file:
                         json.dump(user_info, temp_file)
                     # Fecha a tela atual
                     page.window.close()
                     print('Abrindo pagina 2')
                     # Executa outro script Python
-                    script_path = "./principal/pdv.py"
+                    script_path = "../principal/pdv.py"
                     os.system(f"flet run {script_path}")
                         #subprocess.call(["python", script_path])
                 else:
@@ -82,7 +82,7 @@ def main(page: ft.Page):
         [
             ft.Container(
                 content=ft.Image(
-                    src='./img/login2.jpg',
+                    src='../img/login2.jpg',
                     fit=ft.ImageFit.COVER, 
                 ),
                 alignment=ft.alignment.center,
