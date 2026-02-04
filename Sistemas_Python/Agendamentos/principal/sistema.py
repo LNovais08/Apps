@@ -1,5 +1,6 @@
 from flet import *
 import flet as ft
+import requests
 import sqlite3
 import os
 import subprocess
@@ -67,6 +68,17 @@ def main(page: ft.Page):
 
         e.page.update()
 
+    def format_cep(e):
+        # Remove non-digit characters and limit to 11 characters
+        raw_cep = ''.join(filter(str.isdigit, e.control.value))[:8]
+
+        # Format the CPF
+        formatted_cpf = raw_cep
+        if len(raw_cep) > 4:
+            formatted_cpf = f"{raw_cep[:5]}-{raw_cep[5:8]}"
+        e.control.value = formatted_cpf
+        page.update()
+
     def format_cpf(e):
         # Remove non-digit characters and limit to 11 characters
         raw_cpf = ''.join(filter(str.isdigit, e.control.value))[:11]
@@ -100,6 +112,29 @@ def main(page: ft.Page):
         else:
             cpf.value = "CPF Inválido!!!"
             page.update()
+
+    def buscar_cep(e):
+        c = e.replace('-', '').strip()
+
+        url = f"https://viacep.com.br/ws/{c}/json/" 
+        response = requests.get(url) 
+        if response.status_code == 200: 
+            dados = response.json() 
+            if "erro" not in dados: 
+                return dados 
+        return None
+
+    def on_blur_endereco(e):
+        cep = e.control.value
+        end = buscar_cep(cep)
+        
+        if end:
+            rua.value = end["logradouro"]
+            cidade.value = end["localidade"]
+            bairro.value = end["bairro"]
+            estado.value = end["uf"]
+
+        page.update()
 
     def on_blur_cpf(e):
         validate_cpf(e)
@@ -139,16 +174,22 @@ def main(page: ft.Page):
     #Itens para a consulta
     global idade_field
     cpf = ft.TextField(label="CPF", width=250, on_blur=on_blur_cpf,on_change=format_cpf, prefix_icon=ft.icons.PERSONAL_INJURY_OUTLINED)
-    nome = ft.TextField(label="Nome", width=250, prefix_icon=ft.icons.PEOPLE_SHARP)
-    tel = ft.TextField(label="Telefone", width=250, on_change=format_telefone, prefix_icon=ft.icons.PHONE)
+    nome = ft.TextField(label="Nome", width=300, prefix_icon=ft.icons.PEOPLE_SHARP)
+    tel = ft.TextField(label="Telefone", width=200, on_change=format_telefone, prefix_icon=ft.icons.PHONE)
     idade_field = ft.TextField(label="Idade", width=120, prefix_icon=ft.icons.NUMBERS, keyboard_type=ft.KeyboardType.NUMBER,read_only=True)
     data_nascimento = ft.TextField(label="Data de Nascimento", width=305, prefix_icon=ft.icons.CALENDAR_MONTH,keyboard_type=ft.KeyboardType.NUMBER,on_change=format_data)
+    cep = ft.TextField(label="CEP", width=200, on_change=format_cep, on_blur=on_blur_endereco)
+    rua = ft.TextField(label="Rua", width=420, prefix_icon=ft.icons.HOUSE, read_only=True)
+    num = ft.TextField(label="Nº", width=130, prefix_icon=ft.icons.NUMBERS)
+    estado = ft.TextField(label="UF", width=130, prefix_icon=ft.icons.FLAG, read_only=True)
+    cidade = ft.TextField(label="Cidade", width=300, prefix_icon=ft.icons.LOCAL_ACTIVITY, read_only=True)
+    bairro = ft.TextField(label="Bairro", width=320, prefix_icon=ft.icons.HOUSE, read_only=True)
     pc = ft.Column([
         ft.Text("Paciente", size=40, weight="bold"),
     ], 
         alignment=ft.MainAxisAlignment.START
     )
-    linha1_paciente = ft.Row([cpf,nome,tel], alignment=ft.MainAxisAlignment.CENTER)
+    linha1_paciente = ft.Row([nome,cpf,tel], alignment=ft.MainAxisAlignment.CENTER)
     linha2_paciente = ft.Row([idade_field,data_nascimento,
         ft.Dropdown(label="Convênio", width=325 , options=[
             ft.dropdown.Option("Unimed"),
@@ -159,9 +200,10 @@ def main(page: ft.Page):
             ft.dropdown.Option("Vitallis"),
         ])
     ], alignment=ft.MainAxisAlignment.CENTER)
-
+    linha3_paciente = ft.Row([cep,rua,num], alignment=ft.MainAxisAlignment.CENTER)
+    linha4_paciente = ft.Row([estado,cidade,bairro], alignment=ft.MainAxisAlignment.CENTER)
     layout = ft.Column(
-         controls=[pc,linha1_paciente,linha2_paciente]
+         controls=[pc,linha1_paciente,linha2_paciente,linha3_paciente,linha4_paciente]
     )
 
     paciente = ft.Container(
