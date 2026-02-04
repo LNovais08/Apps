@@ -27,7 +27,7 @@ def main(page: ft.Page):
                 page.update()
             else:
                 # Conecta ao banco de dados e insere os valores
-                conn = sqlite3.connect('../db/agendamentos.db')
+                conn = sqlite3.connect('./db/agendamentos.db')
                 cursor = conn.cursor()
             
                 cursor.execute("SELECT * FROM cadastro_Usuarios WHERE email=? AND senha=?", (email1, senha1))
@@ -49,7 +49,7 @@ def main(page: ft.Page):
                     page.window.close()
                     print('Abrindo pagina 2')
                     # Executa outro script Python
-                    script_path = "../principal/sistema.py"
+                    script_path = "./principal/sistema.py"
                     os.system(f"flet run {script_path}")
                         #subprocess.call(["python", script_path])
                 else:
@@ -75,7 +75,7 @@ def main(page: ft.Page):
         [
             ft.Container(
                 content=ft.Image(
-                    src='../img/tela_login.jpg',
+                    src='./img/tela_login.jpg',
                     fit=ft.ImageFit.COVER,
                     height=700
                 ),
