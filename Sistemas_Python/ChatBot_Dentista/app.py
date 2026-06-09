@@ -32,7 +32,7 @@ def main(page: ft.Page):
     page.theme_mode = ft.ThemeMode.LIGHT
     page.window.center()
     page.padding = 0
-    page.window_resizable = False
+    page.window.resizable = False
     page.window.width = 1000
     page.window.height = 700
     
@@ -89,16 +89,15 @@ def main(page: ft.Page):
 
         page.update()
 
-    
-    titulo = ft.Text(
-        "Dashboard - Consultas",
-        size=28,
-        weight=ft.FontWeight.BOLD
-    )
 
-    btn_atualizar = ft.ElevatedButton(
-        "Atualizar",
+    btn_atualizar = ft.TextButton(
+        text="Atualizar",
         icon="REFRESH",
+        width=250,
+        style=ft.ButtonStyle(
+            bgcolor=ft.colors.TRANSPARENT,
+            overlay_color=ft.colors.BLUE_300,
+        ),
         on_click=carregar_consultas
     )
     navebar = ft.Container(
@@ -110,7 +109,8 @@ def main(page: ft.Page):
             controls=[
                 ft.Image(
                     src="ChatBot_Dentista/img/logo.png",
-                    width= 400,
+                    width= 370,
+                    height= 150,
                 ),
                 ft.Text(
                     "Clínica Odontológica",
@@ -118,6 +118,8 @@ def main(page: ft.Page):
                     weight=ft.FontWeight.BOLD
                 ),
                 btn_atualizar,
+                ft.Divider(),
+                tabela
             ]
         )
     )
