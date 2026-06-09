@@ -10,7 +10,7 @@ def main(page: ft.Page):
     page.title = "Agendamentos"
     page.window.center()
     page.padding = 0 
-    page.window_resizable = False
+    page.window.resizable = False
 
     email_login = ft.TextField(label="E-mail", width=450, color="black", text_size=15,border=ft.InputBorder.UNDERLINE,filled=True, prefix_icon=ft.icons.PERSON)
     senha_login = ft.TextField(label="Senha", width=450, color="black", password=True, can_reveal_password=True, text_size=15,border=ft.InputBorder.UNDERLINE,filled=True,  prefix_icon=ft.icons.KEY)
@@ -27,7 +27,7 @@ def main(page: ft.Page):
                 page.update()
             else:
                 # Conecta ao banco de dados e insere os valores
-                conn = sqlite3.connect('./db/agendamentos.db')
+                conn = sqlite3.connect('Agendamentos/db/agendamentos.db')
                 cursor = conn.cursor()
             
                 cursor.execute("SELECT * FROM cadastro_Usuarios WHERE email=? AND senha=?", (email1, senha1))
@@ -43,13 +43,13 @@ def main(page: ft.Page):
                         'cpf': result[4],
                         'grau': result[5]
                     }
-                    with open("./temp_user_info.json", "w") as temp_file:
+                    with open("Agendamentos/temp_user_info.json", "w") as temp_file:
                         json.dump(user_info, temp_file)
                     # Fecha a tela atual
                     page.window.close()
                     print('Abrindo pagina 2')
                     # Executa outro script Python
-                    script_path = "./principal/sistema.py"
+                    script_path = "Agendamentos/principal/sistema.py"
                     os.system(f"flet run {script_path}")
                         #subprocess.call(["python", script_path])
                 else:
@@ -75,7 +75,7 @@ def main(page: ft.Page):
         [
             ft.Container(
                 content=ft.Image(
-                    src='./img/tela_login.jpg',
+                    src='Agendamentos/img/tela_login.jpg',
                     fit=ft.ImageFit.COVER,
                     height=700
                 ),

@@ -13,7 +13,7 @@ def main(page: ft.Page):
     page.window.center()
     page.padding = 0 
     page.window_resizable = False
-    with open("temp_user_info.json", "r") as temp_file:
+    with open("Agendamentos/temp_user_info.json", "r") as temp_file:
             user_info = json.load(temp_file)
     
     def atualizar_data():
@@ -154,7 +154,7 @@ def main(page: ft.Page):
     #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     #HOME------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     video_bg = ft.Video(
-        playlist=ft.VideoMedia(resource='img/PGinicial.mp4'),
+        playlist=ft.VideoMedia(resource='Agendamentos/img/PGinicial.mp4'),
         autoplay=True,
         show_controls=False,
         expand=True,
