@@ -92,7 +92,7 @@ def main(page: ft.Page):
 
     btn_atualizar = ft.TextButton(
         text="Atualizar",
-        icon="REFRESH",
+        icon=ft.icons.REFRESH,
         width=250,
         style=ft.ButtonStyle(
             bgcolor=ft.colors.TRANSPARENT,
