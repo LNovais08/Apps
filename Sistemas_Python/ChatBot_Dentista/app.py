@@ -26,7 +26,6 @@ def main(page: ft.Page):
         bgcolor=ft.Colors.BLUE_900,
         padding=25,
         alignment=ft.Alignment.CENTER_LEFT,
-
         content=ft.Column(
             controls=[
                 ft.Container(
@@ -107,4 +106,4 @@ def main(page: ft.Page):
     navegar_pagina("dashboard")
 
 
-ft.app(target=main)
+ft.run(main)
