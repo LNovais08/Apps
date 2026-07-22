@@ -205,14 +205,14 @@ def build_pacientes_page(page: ft.Page):
     modal_layer = ft.Container(
         visible=False,
         expand=True,
-        bgcolor=ft.Colors.BLACK_54,
+        bgcolor=ft.Colors.BLACK_26,
         alignment=ft.Alignment.CENTER,
         content=ft.Container(
             width=560,
             padding=24,
-            bgcolor=ft.Colors.WHITE,
+            bgcolor=ft.Colors.GREY_100,
             border_radius=24,
-            shadow=ft.BoxShadow(blur_radius=24, color=ft.Colors.GREY_300, offset=ft.Offset(0, 8), spread_radius=1),
+            shadow=ft.BoxShadow(blur_radius=10, color=ft.Colors.GREY_300, offset=ft.Offset(0, 2), spread_radius=0),
             content=ft.Column(
                 controls=[
                     ft.Row(
@@ -221,9 +221,9 @@ def build_pacientes_page(page: ft.Page):
                                 width=50,
                                 height=50,
                                 border_radius=25,
-                                bgcolor=ft.Colors.BLUE_50,
+                                bgcolor=ft.Colors.BLUE_100,
                                 alignment=ft.Alignment.CENTER,
-                                content=ft.Icon(ft.Icons.PERSON, color=ft.Colors.BLUE_700, size=26),
+                                content=ft.Icon(ft.Icons.PERSON, color=ft.Colors.BLUE_700, size=24),
                             ),
                             ft.Column(
                                 controls=[
@@ -245,7 +245,7 @@ def build_pacientes_page(page: ft.Page):
                     ),
                     ft.Container(
                         padding=14,
-                        bgcolor=ft.Colors.BLUE_50,
+                        bgcolor=ft.Colors.GREY_50,
                         border_radius=14,
                         content=modal_observacoes,
                     ),
@@ -582,9 +582,9 @@ def build_pacientes_page(page: ft.Page):
                 ft.Divider(color=ft.Colors.GREY_200),
                 ft.Row(controls=[nome_field, cpf_field], spacing=12),
                 ft.Row(controls=[nascimento_field, telefone_field], spacing=12),
-                ft.Row(controls=[cep_field, endereco_field], spacing=12),
-                ft.Row(controls=[numero_field, cidade_field], spacing=12),
-                ft.Row(controls=[uf_field], spacing=12),
+                ft.Row(controls=[cep_field, numero_field], spacing=12),
+                ft.Row(controls=[cidade_field, uf_field], spacing=12),
+                endereco_field,
                 observacoes_field,
                 status_text,
                 ft.Row(
