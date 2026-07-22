@@ -1,139 +1,92 @@
 import flet as ft
-import sqlite3
-
-
-def buscar_consultas():
-
-    conexao = sqlite3.connect("ChatBot_Dentista/db/clinica.db")
-    cursor = conexao.cursor()
-
-    cursor.execute("""
-        SELECT
-            p.nome,
-            c.data_consulta,
-            c.horario,
-            c.status
-        FROM consultas c
-        JOIN pacientes p
-            ON p.id = c.paciente_id
-        ORDER BY c.data_consulta, c.horario
-    """)
-
-    dados = cursor.fetchall()
-
-    conexao.close()
-
-    return dados
+from Pages.agenda import build_agenda_page
+from Pages.dashboard import build_dashboard_page
+from Pages.pacientes import build_pacientes_page
 
 
 def main(page: ft.Page):
-
     page.title = "Clínica Odontológica"
     page.theme_mode = ft.ThemeMode.LIGHT
-    page.window.center()
     page.padding = 0
+    page.spacing = 0
     page.window.resizable = False
-    page.window.width = 1000
-    page.window.height = 700
-    
+    page.window.maximized = True
 
-    tabela = ft.Column(scroll=ft.ScrollMode.AUTO)
-
-    def carregar_consultas(e=None):
-
-        tabela.controls.clear()
-
-        consultas = buscar_consultas()
-
-        if not consultas:
-
-            tabela.controls.append(
-                ft.Text(
-                    "Nenhuma consulta cadastrada.",
-                    size=18
-                )
-            )
-
+    def navegar_pagina(destino: str):
+        if destino == "agenda":
+            conteudo_principal.content = build_agenda_page(page)
+        elif destino == "pacientes":
+            conteudo_principal.content = build_pacientes_page(page)
         else:
-
-            for nome, data, horario, status in consultas:
-
-                tabela.controls.append(
-                    ft.Card(
-                        content=ft.Container(
-                            padding=15,
-                            content=ft.Row(
-                                controls=[
-                                    ft.Text(
-                                        nome,
-                                        width=250,
-                                        weight=ft.FontWeight.BOLD
-                                    ),
-                                    ft.Text(
-                                        data,
-                                        width=120
-                                    ),
-                                    ft.Text(
-                                        horario,
-                                        width=100
-                                    ),
-                                    ft.Text(
-                                        status,
-                                        width=120
-                                    ),
-                                ]
-                            )
-                        )
-                    )
-                )
-
+            conteudo_principal.content = build_dashboard_page(page)
         page.update()
 
-
-    btn_atualizar = ft.TextButton(
-        text="Atualizar",
-        icon=ft.icons.REFRESH,
-        width=250,
-        style=ft.ButtonStyle(
-            bgcolor=ft.colors.TRANSPARENT,
-            overlay_color=ft.colors.BLUE_300,
-        ),
-        on_click=carregar_consultas
-    )
-    navebar = ft.Container(
-        padding=20,
-        width = 250,
-        height = 700,
-        bgcolor=ft.colors.BLUE_100,
+    sidebar = ft.Container(
+        width=page.width * 0.40,
+        bgcolor=ft.Colors.BLUE_900,
+        padding=10,
+        alignment=ft.Alignment.CENTER,
         content=ft.Column(
             controls=[
                 ft.Image(
-                    src="ChatBot_Dentista/img/logo.png",
-                    width= 370,
-                    height= 150,
+                    src="Sistemas_Python/ChatBot_Dentista/img/logo.png",
+                    width=220,
+                    height=220,
                 ),
                 ft.Text(
                     "Clínica Odontológica",
-                    size=24,
-                    weight=ft.FontWeight.BOLD
+                    size=32,
+                    weight=ft.FontWeight.BOLD,
+                    color=ft.Colors.WHITE,
                 ),
-                btn_atualizar,
-                ft.Divider(),
-                tabela
-            ]
-        )
+                ft.Text(
+                    "Painel administrativo",
+                    size=20,
+                    color=ft.Colors.BLUE_100,
+                ),
+                ft.Divider(color=ft.Colors.BLUE_700),
+                ft.Container(height=10),
+                ft.TextButton(
+                    content=ft.Text("Dashboard", size=18),
+                    icon=ft.Icons.DASHBOARD,
+                    on_click=lambda e: navegar_pagina("dashboard"),
+                    style=ft.ButtonStyle(color=ft.Colors.WHITE),
+                ),
+                ft.TextButton(
+                    content=ft.Text("Agendamentos", size=18),
+                    icon=ft.Icons.CALENDAR_MONTH,
+                    on_click=lambda e: navegar_pagina("agenda"),
+                    style=ft.ButtonStyle(color=ft.Colors.WHITE),
+                ),
+                ft.TextButton(
+                    content=ft.Text("Pacientes", size=18),
+                    icon=ft.Icons.PERSON,
+                    on_click=lambda e: navegar_pagina("pacientes"),
+                    style=ft.ButtonStyle(color=ft.Colors.WHITE),
+                ),
+            ],
+            spacing=12,
+            alignment=ft.MainAxisAlignment.START,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        ),
     )
+
+    conteudo_principal = ft.Container(
+        expand=True,
+        padding=20,
+        bgcolor=ft.Colors.WHITE,
+    )
+
     page.add(
-        ft.Container(
-            content=ft.Column(
-                controls=[
-                    navebar,
-                ]
-            )
+        ft.Row(
+            controls=[sidebar, conteudo_principal],
+            spacing=0,
+            expand=True,
+            vertical_alignment=ft.CrossAxisAlignment.START,
         )
     )
 
-    carregar_consultas()
+    navegar_pagina("dashboard")
 
 
 ft.app(target=main)
