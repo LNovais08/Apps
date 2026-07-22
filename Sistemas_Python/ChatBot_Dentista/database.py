@@ -19,11 +19,12 @@ def ensure_schema(db_path: str | Path | None = None):
             cpf TEXT,
             data_nascimento TEXT,
             telefone TEXT,
-            email TEXT,
             endereco TEXT,
             cidade TEXT,
             observacoes_medicas TEXT,
-            ultima_consulta TEXT,
+            cep TEXT,
+            numero TEXT,
+            uf TEXT,
             data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP
         )
         """
@@ -43,15 +44,46 @@ def ensure_schema(db_path: str | Path | None = None):
     )
 
     colunas_pacientes = {linha[1] for linha in cursor.execute("PRAGMA table_info(pacientes)").fetchall()}
+    if "primeira_consulta" in colunas_pacientes:
+        cursor.execute(
+            """
+            CREATE TABLE pacientes_novo (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nome TEXT NOT NULL,
+                cpf TEXT,
+                data_nascimento TEXT,
+                telefone TEXT,
+                endereco TEXT,
+                cidade TEXT,
+                observacoes_medicas TEXT,
+                cep TEXT,
+                numero TEXT,
+                uf TEXT,
+                data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
+        cursor.execute(
+            """
+            INSERT INTO pacientes_novo (id, nome, cpf, data_nascimento, telefone, endereco, cidade, observacoes_medicas, cep, numero, uf, data_cadastro)
+            SELECT id, nome, cpf, data_nascimento, telefone, endereco, cidade, observacoes_medicas, cep, numero, uf, data_cadastro
+            FROM pacientes
+            """
+        )
+        cursor.execute("DROP TABLE pacientes")
+        cursor.execute("ALTER TABLE pacientes_novo RENAME TO pacientes")
+        colunas_pacientes = {linha[1] for linha in cursor.execute("PRAGMA table_info(pacientes)").fetchall()}
+
     colunas_esperadas = {
         "cpf": "TEXT",
         "data_nascimento": "TEXT",
         "telefone": "TEXT",
-        "email": "TEXT",
         "endereco": "TEXT",
         "cidade": "TEXT",
         "observacoes_medicas": "TEXT",
-        "ultima_consulta": "TEXT",
+        "cep": "TEXT",
+        "numero": "TEXT",
+        "uf": "TEXT",
         "data_cadastro": "DATETIME DEFAULT CURRENT_TIMESTAMP",
     }
 

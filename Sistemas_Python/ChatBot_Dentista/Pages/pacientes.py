@@ -2,11 +2,48 @@ import sqlite3
 import re
 from pathlib import Path
 import flet as ft
+import requests
 from database import ensure_schema
 
 
 def _get_db_path() -> Path:
     return Path(__file__).resolve().parent.parent / "db" / "clinica.db"
+
+
+def _normalizar_paciente(paciente) -> dict:
+    if isinstance(paciente, dict):
+        return paciente
+
+    if not paciente:
+        return {
+            "id": None,
+            "nome": "",
+            "cpf": "",
+            "data_nascimento": "",
+            "telefone": "",
+            "endereco": "",
+            "cidade": "",
+            "observacoes_medicas": "",
+            "cep": "",
+            "numero": "",
+            "uf": "",
+            "data_cadastro": "",
+        }
+
+    return {
+        "id": paciente[0],
+        "nome": paciente[1] or "",
+        "cpf": paciente[2] or "",
+        "data_nascimento": paciente[3] or "",
+        "telefone": paciente[4] or "",
+        "endereco": paciente[5] or "",
+        "cidade": paciente[6] or "",
+        "observacoes_medicas": paciente[7] or "",
+        "cep": paciente[8] or "",
+        "numero": paciente[9] or "",
+        "uf": paciente[10] or "",
+        "data_cadastro": paciente[11] if len(paciente) > 11 else "",
+    }
 
 
 def buscar_pacientes():
@@ -16,7 +53,7 @@ def buscar_pacientes():
 
     cursor.execute(
         """
-        SELECT id, nome, cpf, data_nascimento, telefone, email, endereco, cidade, observacoes_medicas, ultima_consulta
+        SELECT id, nome, cpf, data_nascimento, telefone, endereco, cidade, observacoes_medicas, cep, numero, uf, data_cadastro
         FROM pacientes
         ORDER BY nome
         """
@@ -33,8 +70,8 @@ def inserir_paciente(dados):
     cursor.execute(
         """
         INSERT INTO pacientes (
-            nome, cpf, data_nascimento, telefone, email, endereco, cidade, observacoes_medicas, ultima_consulta
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            nome, cpf, data_nascimento, telefone, endereco, cidade, observacoes_medicas, cep, numero, uf
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         dados,
     )
@@ -49,7 +86,7 @@ def atualizar_paciente(paciente_id, dados):
     cursor.execute(
         """
         UPDATE pacientes
-        SET nome = ?, cpf = ?, data_nascimento = ?, telefone = ?, email = ?, endereco = ?, cidade = ?, observacoes_medicas = ?, ultima_consulta = ?
+        SET nome = ?, cpf = ?, data_nascimento = ?, telefone = ?, endereco = ?, cidade = ?, observacoes_medicas = ?, cep = ?, numero = ?, uf = ?
         WHERE id = ?
         """,
         (*dados, paciente_id),
@@ -119,10 +156,11 @@ def _formatar_telefone(valor: str) -> str:
     return f"({numeros[:2]}) {numeros[2:7]}-{numeros[7:11]}"
 
 
-def _formatar_texto_data(valor: str) -> str:
-    if not valor or not str(valor).strip():
-        return "Não tem última consulta"
-    return _formatar_data(str(valor).strip())
+def _formatar_cep(valor: str) -> str:
+    numeros = re.sub(r"\D", "", valor or "")[:8]
+    if len(numeros) <= 5:
+        return numeros
+    return f"{numeros[:5]}-{numeros[5:]}"
 
 
 def build_pacientes_page(page: ft.Page):
@@ -131,10 +169,11 @@ def build_pacientes_page(page: ft.Page):
     cpf_field = _campo_formulario("CPF", ft.Icons.BADGE_OUTLINED, max_length=14)
     nascimento_field = _campo_formulario("Data de nascimento", ft.Icons.CALENDAR_TODAY, max_length=10)
     telefone_field = _campo_formulario("Telefone", ft.Icons.PHONE_ANDROID, max_length=15)
-    email_field = _campo_formulario("E-mail", ft.Icons.EMAIL_OUTLINED)
+    cep_field = _campo_formulario("CEP", ft.Icons.MAP_OUTLINED, max_length=9)
     endereco_field = _campo_formulario("Endereço", ft.Icons.HOME_OUTLINED)
+    numero_field = _campo_formulario("Número", ft.Icons.HOUSE_OUTLINED)
     cidade_field = _campo_formulario("Cidade", ft.Icons.LOCATION_ON_OUTLINED)
-    ultima_consulta_field = _campo_formulario("Última consulta", ft.Icons.CALENDAR_MONTH)
+    uf_field = _campo_formulario("UF", ft.Icons.FLAG_OUTLINED, max_length=2)
     observacoes_field = _campo_formulario(
         "Observações médicas",
         ft.Icons.MEDICAL_INFORMATION_OUTLINED,
@@ -147,10 +186,11 @@ def build_pacientes_page(page: ft.Page):
         ("CPF", cpf_field),
         ("Data de nascimento", nascimento_field),
         ("Telefone", telefone_field),
-        ("E-mail", email_field),
+        ("CEP", cep_field),
         ("Endereço", endereco_field),
+        ("Número", numero_field),
         ("Cidade", cidade_field),
-        ("Última consulta", ultima_consulta_field),
+        ("UF", uf_field),
         ("Observações médicas", observacoes_field),
     ]
 
@@ -158,7 +198,8 @@ def build_pacientes_page(page: ft.Page):
     lista_pacientes = ft.Column(scroll=ft.ScrollMode.AUTO, spacing=10)
     paciente_editando_id = None
 
-    modal_title = ft.Text("", size=18, weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE_900)
+    modal_title = ft.Text("", size=20, weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE_900)
+    modal_subtitle = ft.Text("Dados cadastrais completos", size=12, color=ft.Colors.GREY_600)
     modal_info = ft.Column(controls=[], spacing=8, scroll=ft.ScrollMode.AUTO)
     modal_observacoes = ft.Column(controls=[], spacing=4)
     modal_layer = ft.Container(
@@ -167,41 +208,45 @@ def build_pacientes_page(page: ft.Page):
         bgcolor=ft.Colors.BLACK_54,
         alignment=ft.Alignment.CENTER,
         content=ft.Container(
-            width=520,
+            width=560,
             padding=24,
             bgcolor=ft.Colors.WHITE,
-            border_radius=20,
-            shadow=ft.BoxShadow(blur_radius=20, color=ft.Colors.GREY_300, offset=ft.Offset(0, 6), spread_radius=1),
+            border_radius=24,
+            shadow=ft.BoxShadow(blur_radius=24, color=ft.Colors.GREY_300, offset=ft.Offset(0, 8), spread_radius=1),
             content=ft.Column(
                 controls=[
                     ft.Row(
                         controls=[
                             ft.Container(
-                                width=44,
-                                height=44,
-                                border_radius=22,
+                                width=50,
+                                height=50,
+                                border_radius=25,
                                 bgcolor=ft.Colors.BLUE_50,
                                 alignment=ft.Alignment.CENTER,
-                                content=ft.Icon(ft.Icons.PERSON, color=ft.Colors.BLUE_700, size=24),
+                                content=ft.Icon(ft.Icons.PERSON, color=ft.Colors.BLUE_700, size=26),
                             ),
                             ft.Column(
                                 controls=[
-                                    ft.Text("Ficha do paciente", size=20, weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE_900),
-                                    ft.Text("Dados cadastrais completos", size=12, color=ft.Colors.GREY_600),
+                                    modal_title,
+                                    modal_subtitle,
                                 ],
                                 spacing=1,
                             ),
                         ],
-                        spacing=10,
+                        spacing=12,
                         vertical_alignment=ft.CrossAxisAlignment.CENTER,
                     ),
                     ft.Divider(color=ft.Colors.GREY_200),
-                    modal_title,
-                    modal_info,
                     ft.Container(
                         padding=12,
+                        bgcolor=ft.Colors.GREY_50,
+                        border_radius=14,
+                        content=modal_info,
+                    ),
+                    ft.Container(
+                        padding=14,
                         bgcolor=ft.Colors.BLUE_50,
-                        border_radius=12,
+                        border_radius=14,
                         content=modal_observacoes,
                     ),
                     ft.Row(
@@ -210,6 +255,11 @@ def build_pacientes_page(page: ft.Page):
                                 "Fechar",
                                 icon=ft.Icons.CLOSE,
                                 on_click=lambda e: fechar_ficha(),
+                                style=ft.ButtonStyle(
+                                    bgcolor=ft.Colors.BLUE_600,
+                                    color=ft.Colors.WHITE,
+                                    shape=ft.RoundedRectangleBorder(radius=10),
+                                ),
                             )
                         ],
                         alignment=ft.MainAxisAlignment.END,
@@ -227,29 +277,32 @@ def build_pacientes_page(page: ft.Page):
             cpf_field.value.strip(),
             nascimento_field.value.strip(),
             telefone_field.value.strip(),
-            email_field.value.strip(),
             endereco_field.value.strip(),
             cidade_field.value.strip(),
             observacoes_field.value.strip(),
-            ultima_consulta_field.value.strip(),
+            cep_field.value.strip(),
+            numero_field.value.strip(),
+            uf_field.value.strip(),
         )
 
     def preparar_formulario_para_edicao(dados_paciente):
         nonlocal paciente_editando_id
-        paciente_editando_id = dados_paciente[0]
-        nome_field.value = dados_paciente[1] or ""
-        cpf_field.value = _formatar_cpf(dados_paciente[2]) if dados_paciente[2] else ""
-        nascimento_field.value = _formatar_data(dados_paciente[3]) if dados_paciente[3] else ""
-        telefone_field.value = _formatar_telefone(dados_paciente[4]) if dados_paciente[4] else ""
-        email_field.value = dados_paciente[5] or ""
-        endereco_field.value = dados_paciente[6] or ""
-        cidade_field.value = dados_paciente[7] or ""
-        observacoes_field.value = dados_paciente[8] or ""
-        ultima_consulta_field.value = dados_paciente[9] or ""
+        paciente_data = _normalizar_paciente(dados_paciente)
+        paciente_editando_id = paciente_data["id"]
+        nome_field.value = paciente_data["nome"] or ""
+        cpf_field.value = _formatar_cpf(paciente_data["cpf"]) if paciente_data["cpf"] else ""
+        nascimento_field.value = _formatar_data(paciente_data["data_nascimento"]) if paciente_data["data_nascimento"] else ""
+        telefone_field.value = _formatar_telefone(paciente_data["telefone"]) if paciente_data["telefone"] else ""
+        endereco_field.value = paciente_data["endereco"] or ""
+        cidade_field.value = paciente_data["cidade"] or ""
+        observacoes_field.value = paciente_data["observacoes_medicas"] or ""
+        cep_field.value = paciente_data["cep"] or ""
+        numero_field.value = paciente_data["numero"] or ""
+        uf_field.value = paciente_data["uf"] or ""
         form_title_text.value = "Editar paciente"
         submit_button.text = "Atualizar paciente"
         submit_button.icon = ft.Icons.SAVE_AS
-        status_text.value = f"Editando {dados_paciente[1] or 'paciente'}"
+        status_text.value = f"Editando {paciente_data['nome'] or 'paciente'}"
         status_text.color = ft.Colors.BLUE_700
         status_text.visible = True
         page.update()
@@ -266,31 +319,74 @@ def build_pacientes_page(page: ft.Page):
         status_text.visible = False
         page.update()
 
+    def buscar_cep(e=None):
+        cep = re.sub(r"\D", "", cep_field.value or "")
+        if len(cep) != 8:
+            return
+
+        try:
+            resposta = requests.get(f"https://viacep.com.br/ws/{cep}/json/", timeout=10)
+            resposta.raise_for_status()
+            dados_cep = resposta.json()
+            if dados_cep.get("erro"):
+                return
+
+            endereco_field.value = dados_cep.get("logradouro", "") or ""
+            cidade_field.value = dados_cep.get("localidade", "") or ""
+            uf_field.value = dados_cep.get("uf", "") or ""
+            status_text.value = "Endereço preenchido automaticamente."
+            status_text.color = ft.Colors.GREEN_700
+            status_text.visible = True
+            page.update()
+        except Exception:
+            return
+
     # Funções de apoio
     def fechar_ficha(e=None):
         modal_layer.visible = False
         page.update()
 
     def abrir_ficha(e, dados_paciente):
-        nome = dados_paciente[1] if dados_paciente[1] else "Paciente"
-        cpf = _formatar_cpf(dados_paciente[2]) if len(dados_paciente) > 2 and dados_paciente[2] else "Não informado"
-        nascimento = _formatar_data(dados_paciente[3]) if len(dados_paciente) > 3 and dados_paciente[3] else "Não informado"
-        telefone = _formatar_telefone(dados_paciente[4]) if len(dados_paciente) > 4 and dados_paciente[4] else "Não informado"
-        email = dados_paciente[5] if len(dados_paciente) > 5 and dados_paciente[5] else "Não informado"
-        endereco = dados_paciente[6] if len(dados_paciente) > 6 and dados_paciente[6] else "Não informado"
-        cidade = dados_paciente[7] if len(dados_paciente) > 7 and dados_paciente[7] else "Não informado"
-        observacoes = dados_paciente[8] if len(dados_paciente) > 8 and dados_paciente[8] else "Nenhuma observação registrada"
-        ultima_consulta = _formatar_texto_data(dados_paciente[9]) if len(dados_paciente) > 9 else "Não tem última consulta"
+        paciente_data = _normalizar_paciente(dados_paciente)
+        nome = paciente_data["nome"] or "Paciente"
+        cpf = _formatar_cpf(paciente_data["cpf"]) if paciente_data["cpf"] else "Não informado"
+        nascimento = _formatar_data(paciente_data["data_nascimento"]) if paciente_data["data_nascimento"] else "Não informado"
+        telefone = _formatar_telefone(paciente_data["telefone"]) if paciente_data["telefone"] else "Não informado"
+        endereco = paciente_data["endereco"] or "Não informado"
+        cidade = paciente_data["cidade"] or "Não informado"
+        observacoes = paciente_data["observacoes_medicas"] or "Nenhuma observação registrada"
+        cep = paciente_data["cep"] or "Não informado"
+        numero = paciente_data["numero"] or "Não informado"
+        uf = paciente_data["uf"] or "Não informado"
 
         modal_title.value = nome
         modal_info.controls = [
-            ft.Row(controls=[ft.Text("CPF", weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_700), ft.Text(cpf, color=ft.Colors.GREY_900)], spacing=8),
-            ft.Row(controls=[ft.Text("Data de nascimento", weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_700), ft.Text(nascimento, color=ft.Colors.GREY_900)], spacing=8),
-            ft.Row(controls=[ft.Text("Telefone", weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_700), ft.Text(telefone, color=ft.Colors.GREY_900)], spacing=8),
-            ft.Row(controls=[ft.Text("E-mail", weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_700), ft.Text(email, color=ft.Colors.GREY_900)], spacing=8),
-            ft.Row(controls=[ft.Text("Endereço", weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_700), ft.Text(endereco, color=ft.Colors.GREY_900)], spacing=8),
-            ft.Row(controls=[ft.Text("Cidade", weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_700), ft.Text(cidade, color=ft.Colors.GREY_900)], spacing=8),
-            ft.Row(controls=[ft.Text("Última consulta", weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_700), ft.Text(ultima_consulta, color=ft.Colors.GREY_900)], spacing=8),
+            ft.Container(
+                content=ft.Column(
+                    controls=[
+                        ft.Text("Informações pessoais", size=14, weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE_900),
+                        ft.Row(controls=[ft.Text("CPF", weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_700), ft.Text(cpf, color=ft.Colors.GREY_900)], spacing=8),
+                        ft.Row(controls=[ft.Text("Data de nascimento", weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_700), ft.Text(nascimento, color=ft.Colors.GREY_900)], spacing=8),
+                        ft.Row(controls=[ft.Text("Telefone", weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_700), ft.Text(telefone, color=ft.Colors.GREY_900)], spacing=8),
+                    ],
+                    spacing=4,
+                ),
+                padding=0,
+            ),
+            ft.Container(
+                content=ft.Column(
+                    controls=[
+                        ft.Text("Endereço", size=14, weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE_900),
+                        ft.Row(controls=[ft.Text("CEP", weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_700), ft.Text(cep, color=ft.Colors.GREY_900)], spacing=8),
+                        ft.Row(controls=[ft.Text("Endereço", weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_700), ft.Text(endereco, color=ft.Colors.GREY_900)], spacing=8),
+                        ft.Row(controls=[ft.Text("Número", weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_700), ft.Text(numero, color=ft.Colors.GREY_900)], spacing=8),
+                        ft.Row(controls=[ft.Text("Cidade", weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_700), ft.Text(cidade, color=ft.Colors.GREY_900)], spacing=8),
+                        ft.Row(controls=[ft.Text("UF", weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_700), ft.Text(uf, color=ft.Colors.GREY_900)], spacing=8),
+                    ],
+                    spacing=4,
+                ),
+                padding=0,
+            ),
         ]
         modal_observacoes.controls = [
             ft.Text("Observações médicas", weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE_900),
@@ -312,9 +408,16 @@ def build_pacientes_page(page: ft.Page):
         telefone_field.value = _formatar_telefone(e.control.value)
         telefone_field.update()
 
+    def on_cep_change(e):
+        cep_field.value = _formatar_cep(e.control.value)
+        cep_field.update()
+        if len(re.sub(r"\D", "", cep_field.value or "")) == 8:
+            buscar_cep()
+
     cpf_field.on_change = on_cpf_change
     nascimento_field.on_change = on_data_change
     telefone_field.on_change = on_telefone_change
+    cep_field.on_change = on_cep_change
 
     # Carregamento e renderização
     def carregar_pacientes():
@@ -333,12 +436,12 @@ def build_pacientes_page(page: ft.Page):
             )
         else:
             for paciente in pacientes:
-                paciente_id = paciente[0]
-                nome = paciente[1] if paciente[1] else "Paciente"
-                cpf = _formatar_cpf(paciente[2]) if len(paciente) > 2 and paciente[2] else "Não informado"
-                nascimento = _formatar_data(paciente[3]) if len(paciente) > 3 and paciente[3] else "Não informado"
-                telefone = _formatar_telefone(paciente[4]) if len(paciente) > 4 and paciente[4] else "Não informado"
-                ultima_consulta = _formatar_texto_data(paciente[9]) if len(paciente) > 9 else "Não tem última consulta"
+                paciente_data = _normalizar_paciente(paciente)
+                paciente_id = paciente_data["id"]
+                nome = paciente_data["nome"] or "Paciente"
+                cpf = _formatar_cpf(paciente_data["cpf"]) if paciente_data["cpf"] else "Não informado"
+                nascimento = _formatar_data(paciente_data["data_nascimento"]) if paciente_data["data_nascimento"] else "Não informado"
+                telefone = _formatar_telefone(paciente_data["telefone"]) if paciente_data["telefone"] else "Não informado"
 
                 lista_pacientes.controls.append(
                     ft.Container(
@@ -381,7 +484,6 @@ def build_pacientes_page(page: ft.Page):
                                     controls=[
                                         ft.Text(f"CPF: {cpf}", size=13, color=ft.Colors.GREY_700),
                                         ft.Text(f"Nasc.: {nascimento}", size=13, color=ft.Colors.GREY_700),
-                                        ft.Text(f"Últ. consulta: {ultima_consulta}", size=13, color=ft.Colors.GREY_700),
                                     ],
                                     spacing=16,
                                     wrap=True,
@@ -480,8 +582,9 @@ def build_pacientes_page(page: ft.Page):
                 ft.Divider(color=ft.Colors.GREY_200),
                 ft.Row(controls=[nome_field, cpf_field], spacing=12),
                 ft.Row(controls=[nascimento_field, telefone_field], spacing=12),
-                ft.Row(controls=[email_field, endereco_field], spacing=12),
-                ft.Row(controls=[cidade_field, ultima_consulta_field], spacing=12),
+                ft.Row(controls=[cep_field, endereco_field], spacing=12),
+                ft.Row(controls=[numero_field, cidade_field], spacing=12),
+                ft.Row(controls=[uf_field], spacing=12),
                 observacoes_field,
                 status_text,
                 ft.Row(
