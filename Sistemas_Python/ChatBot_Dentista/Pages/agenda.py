@@ -342,11 +342,19 @@ def build_agenda_page(page: ft.Page):
         ano_atual, mes_atual = novo_ano, novo_mes
         carregar_consultas()
 
+    def atualizar_calendario(e=None):
+        # Recarrega consultas e re-renderiza calendário do mês atual selecionado
+        carregar_consultas()
+
     btn_atualizar = ft.ElevatedButton(
         "Atualizar",
         icon=ft.Icons.REFRESH,
-        on_click=carregar_consultas,
-        style=ft.ButtonStyle(bgcolor=ft.Colors.BLUE_600, color=ft.Colors.WHITE, shape=ft.RoundedRectangleBorder(radius=10)),
+        on_click=atualizar_calendario,
+        style=ft.ButtonStyle(
+            bgcolor=ft.Colors.BLUE_600,
+            color=ft.Colors.WHITE,
+            shape=ft.RoundedRectangleBorder(radius=10),
+        ),
     )
     btn_mes_anterior = ft.IconButton(ft.Icons.CHEVRON_LEFT, on_click=lambda e: mudar_mes(-1))
     btn_mes_seguinte = ft.IconButton(ft.Icons.CHEVRON_RIGHT, on_click=lambda e: mudar_mes(1))

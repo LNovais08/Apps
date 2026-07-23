@@ -21,6 +21,7 @@ def _normalizar_paciente(paciente) -> dict:
             "cpf": "",
             "data_nascimento": "",
             "telefone": "",
+            "email": "",
             "endereco": "",
             "cidade": "",
             "observacoes_medicas": "",
@@ -36,13 +37,14 @@ def _normalizar_paciente(paciente) -> dict:
         "cpf": paciente[2] or "",
         "data_nascimento": paciente[3] or "",
         "telefone": paciente[4] or "",
-        "endereco": paciente[5] or "",
-        "cidade": paciente[6] or "",
-        "observacoes_medicas": paciente[7] or "",
-        "cep": paciente[8] or "",
-        "numero": paciente[9] or "",
-        "uf": paciente[10] or "",
-        "data_cadastro": paciente[11] if len(paciente) > 11 else "",
+        "email": paciente[5] or "",
+        "endereco": paciente[6] or "",
+        "cidade": paciente[7] or "",
+        "observacoes_medicas": paciente[8] or "",
+        "cep": paciente[9] or "",
+        "numero": paciente[10] or "",
+        "uf": paciente[11] or "",
+        "data_cadastro": paciente[12] if len(paciente) > 12 else "",
     }
 
 
@@ -53,7 +55,7 @@ def buscar_pacientes():
 
     cursor.execute(
         """
-        SELECT id, nome, cpf, data_nascimento, telefone, endereco, cidade, observacoes_medicas, cep, numero, uf, data_cadastro
+        SELECT id, nome, cpf, data_nascimento, telefone, email, endereco, cidade, observacoes_medicas, cep, numero, uf, data_cadastro
         FROM pacientes
         ORDER BY nome
         """
@@ -70,8 +72,8 @@ def inserir_paciente(dados):
     cursor.execute(
         """
         INSERT INTO pacientes (
-            nome, cpf, data_nascimento, telefone, endereco, cidade, observacoes_medicas, cep, numero, uf
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            nome, cpf, data_nascimento, telefone, email, endereco, cidade, observacoes_medicas, cep, numero, uf
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         dados,
     )
@@ -86,7 +88,7 @@ def atualizar_paciente(paciente_id, dados):
     cursor.execute(
         """
         UPDATE pacientes
-        SET nome = ?, cpf = ?, data_nascimento = ?, telefone = ?, endereco = ?, cidade = ?, observacoes_medicas = ?, cep = ?, numero = ?, uf = ?
+        SET nome = ?, cpf = ?, data_nascimento = ?, telefone = ?, email = ?, endereco = ?, cidade = ?, observacoes_medicas = ?, cep = ?, numero = ?, uf = ?
         WHERE id = ?
         """,
         (*dados, paciente_id),
@@ -163,12 +165,16 @@ def _formatar_cep(valor: str) -> str:
     return f"{numeros[:5]}-{numeros[5:]}"
 
 
+def _email_valido(valor: str) -> bool:
+    return bool(re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", (valor or "").strip()))
+
+
 def build_pacientes_page(page: ft.Page):
-    # Campos do formulário
     nome_field = _campo_formulario("Nome completo", ft.Icons.PERSON_OUTLINE)
     cpf_field = _campo_formulario("CPF", ft.Icons.BADGE_OUTLINED, max_length=14)
     nascimento_field = _campo_formulario("Data de nascimento", ft.Icons.CALENDAR_TODAY, max_length=10)
     telefone_field = _campo_formulario("Telefone", ft.Icons.PHONE_ANDROID, max_length=15)
+    email_field = _campo_formulario("E-mail", ft.Icons.EMAIL_OUTLINED)
     cep_field = _campo_formulario("CEP", ft.Icons.MAP_OUTLINED, max_length=9)
     endereco_field = _campo_formulario("Endereço", ft.Icons.HOME_OUTLINED)
     numero_field = _campo_formulario("Número", ft.Icons.HOUSE_OUTLINED)
@@ -186,6 +192,7 @@ def build_pacientes_page(page: ft.Page):
         ("CPF", cpf_field),
         ("Data de nascimento", nascimento_field),
         ("Telefone", telefone_field),
+        ("E-mail", email_field),
         ("CEP", cep_field),
         ("Endereço", endereco_field),
         ("Número", numero_field),
@@ -277,6 +284,7 @@ def build_pacientes_page(page: ft.Page):
             cpf_field.value.strip(),
             nascimento_field.value.strip(),
             telefone_field.value.strip(),
+            email_field.value.strip(),
             endereco_field.value.strip(),
             cidade_field.value.strip(),
             observacoes_field.value.strip(),
@@ -293,6 +301,7 @@ def build_pacientes_page(page: ft.Page):
         cpf_field.value = _formatar_cpf(paciente_data["cpf"]) if paciente_data["cpf"] else ""
         nascimento_field.value = _formatar_data(paciente_data["data_nascimento"]) if paciente_data["data_nascimento"] else ""
         telefone_field.value = _formatar_telefone(paciente_data["telefone"]) if paciente_data["telefone"] else ""
+        email_field.value = paciente_data["email"] or ""
         endereco_field.value = paciente_data["endereco"] or ""
         cidade_field.value = paciente_data["cidade"] or ""
         observacoes_field.value = paciente_data["observacoes_medicas"] or ""
@@ -341,7 +350,6 @@ def build_pacientes_page(page: ft.Page):
         except Exception:
             return
 
-    # Funções de apoio
     def fechar_ficha(e=None):
         modal_layer.visible = False
         page.update()
@@ -352,6 +360,7 @@ def build_pacientes_page(page: ft.Page):
         cpf = _formatar_cpf(paciente_data["cpf"]) if paciente_data["cpf"] else "Não informado"
         nascimento = _formatar_data(paciente_data["data_nascimento"]) if paciente_data["data_nascimento"] else "Não informado"
         telefone = _formatar_telefone(paciente_data["telefone"]) if paciente_data["telefone"] else "Não informado"
+        email = paciente_data["email"] or "Não informado"
         endereco = paciente_data["endereco"] or "Não informado"
         cidade = paciente_data["cidade"] or "Não informado"
         observacoes = paciente_data["observacoes_medicas"] or "Nenhuma observação registrada"
@@ -368,6 +377,7 @@ def build_pacientes_page(page: ft.Page):
                         ft.Row(controls=[ft.Text("CPF", weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_700), ft.Text(cpf, color=ft.Colors.GREY_900)], spacing=8),
                         ft.Row(controls=[ft.Text("Data de nascimento", weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_700), ft.Text(nascimento, color=ft.Colors.GREY_900)], spacing=8),
                         ft.Row(controls=[ft.Text("Telefone", weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_700), ft.Text(telefone, color=ft.Colors.GREY_900)], spacing=8),
+                        ft.Row(controls=[ft.Text("E-mail", weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_700), ft.Text(email, color=ft.Colors.GREY_900)], spacing=8),
                     ],
                     spacing=4,
                 ),
@@ -395,7 +405,6 @@ def build_pacientes_page(page: ft.Page):
         modal_layer.visible = True
         page.update()
 
-    # Eventos de máscara
     def on_cpf_change(e):
         cpf_field.value = _formatar_cpf(e.control.value)
         cpf_field.update()
@@ -419,7 +428,6 @@ def build_pacientes_page(page: ft.Page):
     telefone_field.on_change = on_telefone_change
     cep_field.on_change = on_cep_change
 
-    # Carregamento e renderização
     def carregar_pacientes():
         lista_pacientes.controls.clear()
         pacientes = buscar_pacientes()
@@ -437,11 +445,11 @@ def build_pacientes_page(page: ft.Page):
         else:
             for paciente in pacientes:
                 paciente_data = _normalizar_paciente(paciente)
-                paciente_id = paciente_data["id"]
                 nome = paciente_data["nome"] or "Paciente"
                 cpf = _formatar_cpf(paciente_data["cpf"]) if paciente_data["cpf"] else "Não informado"
                 nascimento = _formatar_data(paciente_data["data_nascimento"]) if paciente_data["data_nascimento"] else "Não informado"
                 telefone = _formatar_telefone(paciente_data["telefone"]) if paciente_data["telefone"] else "Não informado"
+                email = paciente_data["email"] or "Não informado"
 
                 lista_pacientes.controls.append(
                     ft.Container(
@@ -465,6 +473,7 @@ def build_pacientes_page(page: ft.Page):
                                             controls=[
                                                 ft.Text(nome, size=15, weight=ft.FontWeight.BOLD),
                                                 ft.Text(telefone, size=12, color=ft.Colors.GREY_600),
+                                                ft.Text(email, size=12, color=ft.Colors.GREY_600),
                                             ],
                                             expand=True,
                                             spacing=2,
@@ -527,6 +536,13 @@ def build_pacientes_page(page: ft.Page):
             page.update()
             return
 
+        if not _email_valido(email_field.value):
+            status_text.value = "Informe um e-mail válido."
+            status_text.color = ft.Colors.RED_600
+            status_text.visible = True
+            page.update()
+            return
+
         dados = obter_dados_formulario()
         if paciente_editando_id is None:
             inserir_paciente(dados)
@@ -543,7 +559,6 @@ def build_pacientes_page(page: ft.Page):
         carregar_pacientes()
         page.update()
 
-    # Blocos da interface
     form_title_text = ft.Text("Cadastro de Paciente", size=20, weight=ft.FontWeight.BOLD)
     form_subtitle_text = ft.Text("Preencha as informações para registrar um novo paciente", size=13, color=ft.Colors.GREY_600)
     submit_button = ft.ElevatedButton(
@@ -582,6 +597,7 @@ def build_pacientes_page(page: ft.Page):
                 ft.Divider(color=ft.Colors.GREY_200),
                 ft.Row(controls=[nome_field, cpf_field], spacing=12),
                 ft.Row(controls=[nascimento_field, telefone_field], spacing=12),
+                ft.Row(controls=[email_field], spacing=12),
                 ft.Row(controls=[cep_field, numero_field], spacing=12),
                 ft.Row(controls=[cidade_field, uf_field], spacing=12),
                 endereco_field,
@@ -630,7 +646,7 @@ def build_pacientes_page(page: ft.Page):
                 ),
                 ft.TextField(
                     expand=True,
-                    hint_text="Buscar por nome, CPF ou telefone",
+                    hint_text="Buscar por nome, CPF, telefone ou e-mail",
                     prefix_icon=ft.Icons.SEARCH,
                     border_radius=12,
                     border_color=ft.Colors.GREY_300,

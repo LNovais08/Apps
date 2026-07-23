@@ -12,8 +12,8 @@ def main(page: ft.Page):
     page.padding = 0 
     page.window.resizable = False
 
-    email_login = ft.TextField(label="E-mail", width=450, color="black", text_size=15,border=ft.InputBorder.UNDERLINE,filled=True, prefix_icon=ft.icons.PERSON)
-    senha_login = ft.TextField(label="Senha", width=450, color="black", password=True, can_reveal_password=True, text_size=15,border=ft.InputBorder.UNDERLINE,filled=True,  prefix_icon=ft.icons.KEY)
+    email_login = ft.TextField(label="E-mail", width=450, color="black", text_size=15,border=ft.InputBorder.UNDERLINE,filled=True, prefix_icon=ft.Icons.PERSON_OUTLINE)
+    senha_login = ft.TextField(label="Senha", width=450, color="black", password=True, can_reveal_password=True, text_size=15,border=ft.InputBorder.UNDERLINE,filled=True,  prefix_icon=ft.Icons.KEY)
 
     # Botão de Login
     def logar_clicked(e):
@@ -57,7 +57,7 @@ def main(page: ft.Page):
                     senha_login.value = ""
                     page.update()
 
-    logar = ft.ElevatedButton(text="Logar", width=150, height=50, color="white", bgcolor="#1087e6", on_click=logar_clicked)
+    logar = ft.ElevatedButton("Logar", width=150, height=50, color="white", bgcolor="#1087e6", on_click=logar_clicked)
 
     # Criando o contêiner de login
     login = ft.Container(
@@ -68,7 +68,7 @@ def main(page: ft.Page):
             spacing=26
         ),
         expand=True,
-        alignment=ft.alignment.center,
+        alignment=ft.Alignment.CENTER,
     )
     
     main = ft.ResponsiveRow(
@@ -76,16 +76,15 @@ def main(page: ft.Page):
             ft.Container(
                 content=ft.Image(
                     src='Agendamentos/img/tela_login.jpg',
-                    fit=ft.ImageFit.COVER,
                     height=700
                 ),
-                alignment=ft.alignment.center,
+                alignment=ft.Alignment.CENTER,
                 expand=True,
                 col={"sm": 6, "md": 6, "xl": 6},
             ),
             ft.Container(
                 content=login,
-                alignment=ft.alignment.center,
+                alignment=ft.Alignment.CENTER,
                 expand=True,
                 col={"sm": 6, "md": 6, "xl": 6},
             ),
@@ -94,4 +93,4 @@ def main(page: ft.Page):
     )
     page.add(main)
 
-ft.app(target=main)
+ft.run(main)
